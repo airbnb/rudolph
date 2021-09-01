@@ -69,7 +69,7 @@ deps:
 	go mod tidy
 
 # Builds the source for all of the Lambda functions + the Rudolph CLI
-build:
+build: clean deps
 	$(info *** building endpoints)
 	@for handler in $(HANDLERS); do \
 		echo "building $$handler function: $(LINUX_BUILD_DIR)/$$handler" ; \

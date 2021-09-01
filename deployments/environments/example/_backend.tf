@@ -16,3 +16,7 @@ terraform {
     kms_key_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
   }
 }
+
+provider "aws" {
+  region = "us-east-1"
+}
