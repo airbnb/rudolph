@@ -1,5 +1,5 @@
 module "santa_api" {
-  source = "../../modules/santa_api"
+  source = "../../terraform_modules/santa_api"
 
   prefix                             = var.prefix
   region                             = var.region
