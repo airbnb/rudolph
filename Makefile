@@ -4,8 +4,8 @@ BUILD_DIR = build
 LINUX_BUILD_DIR = $(BUILD_DIR)/linux
 MACOS_BUILD_DIR = $(BUILD_DIR)/macos
 CLI_NAME = rudolph
-PKG_DIR = package
 DOCS_DIR ?= ./docs
+PKG_DIR = $(BUILD_DIR)/package
 DEPLOYMENT_ZIP_PATH = $(PKG_DIR)/deployment.zip
 TERRAFORM_DEPLOYMENTS_DIR = $(PWD)/deployments/environments
 TF_DEFAULT_FLAGS = --var zip_file_path="$(PWD)/$(DEPLOYMENT_ZIP_PATH)" --var package_version=$(VERSION)
@@ -69,7 +69,7 @@ deps:
 	go mod tidy
 
 # Builds the source for all of the Lambda functions + the Rudolph CLI
-build: rudolph
+build:
 	$(info *** building endpoints)
 	@for handler in $(HANDLERS); do \
 		echo "building $$handler function: $(LINUX_BUILD_DIR)/$$handler" ; \
