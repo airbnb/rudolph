@@ -57,29 +57,5 @@ func (c client) Send(machineID string, events LambdaEvents) (err error) {
 		err = errors.Wrap(err, "lambda:InvokeFunction call failed")
 	}
 
-	// inputs := []*awslambda.InvokeInput{}
-	// for _, event := range events.Items {
-	// 	item, err := json.Marshal(event)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	// https://docs.aws.amazon.com/lambda/latest/dg/API_InvokeAsync.html#API_InvokeAsync_RequestSyntax
-	// 	input := &awslambda.InvokeInput{
-	// 		Payload: item,
-	// 		// FunctionName:   aws.String("arn:aws:lambda:us-east-1:009715504418:function:ryxias_comet_streamalert"),
-	// 		FunctionName:   aws.String("ryxias_comet_streamalert"),
-	// 		Qualifier:      aws.String("$LATEST"),
-	// 		InvocationType: aws.String(awslambda.InvocationTypeEvent),
-	// 		LogType:        aws.String(awslambda.LogTypeNone),
-	// 	}
-
-	// 	inputs = append(inputs, input)
-
-	// 	_, err := c.lambdaService.Invoke(input)
-	// }
-
-	// _, err = c.kinesisService.PutRecords(putRecordsInput)
-
 	return
 }

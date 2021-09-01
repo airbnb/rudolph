@@ -8,7 +8,6 @@ PKG_DIR = package
 DOCS_DIR ?= ./docs
 DEPLOYMENT_ZIP_PATH = $(PKG_DIR)/deployment.zip
 TERRAFORM_DEPLOYMENTS_DIR = $(PWD)/terraform/deployments
-TERRAFORM_DEPLOYMENTS_TEMPLATE_DIR = $(PWD)/terraform/deployment_templates
 TF_DEFAULT_FLAGS = --var zip_file_path="$(PWD)/$(DEPLOYMENT_ZIP_PATH)" --var package_version=$(VERSION)
 LDFLAGS=-ldflags="-X main.version=$(VERSION)"
 
@@ -45,12 +44,6 @@ plan: .check-args
 # Required upon first deployment and when the tf state drifts too far from the local cached state.
 tf-init: .check-args
 	terraform -chdir=$(TERRAFORM_DEPLOYMENTS_ENV_DIR) init
-
-# FIXME (derek.wang)
-# 1) Check if the ENV doesn't exist already, to prevent overriding existing
-# Always use dev template, because each prod environment should be built by hand
-new-deployment: .check-args
-	cp -r "$(TERRAFORM_DEPLOYMENTS_TEMPLATE_DIR)/dev/." "$(TERRAFORM_DEPLOYMENTS_ENV_DIR)"
 
 # Destroys the current deployment.
 destroy: tf-init
