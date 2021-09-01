@@ -7,7 +7,7 @@ CLI_NAME = rudolph
 PKG_DIR = package
 DOCS_DIR ?= ./docs
 DEPLOYMENT_ZIP_PATH = $(PKG_DIR)/deployment.zip
-TERRAFORM_DEPLOYMENTS_DIR = $(PWD)/terraform/deployments
+TERRAFORM_DEPLOYMENTS_DIR = $(PWD)/deployments/environments
 TF_DEFAULT_FLAGS = --var zip_file_path="$(PWD)/$(DEPLOYMENT_ZIP_PATH)" --var package_version=$(VERSION)
 LDFLAGS=-ldflags="-X main.version=$(VERSION)"
 

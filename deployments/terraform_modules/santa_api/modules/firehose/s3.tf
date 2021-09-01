@@ -1,5 +1,5 @@
 locals {
-  source_bucket_name     = "${var.prefix}-rudolph-eventsupload-firehose"
+  source_bucket_name     = "${var.prefix}-rudolph-events"
   s3_logging_bucket_name = var.existing_logging_bucket_name != "" ? var.existing_logging_bucket_name : "${local.source_bucket_name}-logging"
 }
 
