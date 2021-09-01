@@ -1,0 +1,7 @@
+.terraform
+*.zip
+build
+package
+.terraform.lock.hcl
+.terraform.lock
+/rudolph
