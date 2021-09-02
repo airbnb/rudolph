@@ -1,7 +1,6 @@
 package preflight
 
 import (
-	"log"
 	"net/http"
 	"os"
 
@@ -15,12 +14,12 @@ import (
 )
 
 type PostPreflightHandler struct {
-	booted                     bool
-	daysElapseUntilCleanSync   int
-	sensorDataSaver            sensorDataSaver
-	machineConfigurationGetter machineConfigurationGetter
-	syncStateManager           syncStateManager
-	timeProvider               clock.TimeProvider
+	booted                      bool
+	rudolphDynamoDBClient       dynamodb.DynamoDBClient
+	machineConfigurationService machineconfiguration.MachineConfigurationService
+	stateTrackingService        stateTrackingService
+	cleanSyncService            cleanSyncService
+	timeProvider                clock.TimeProvider
 }
 
 //
@@ -31,21 +30,15 @@ func (h *PostPreflightHandler) Boot() (err error) {
 
 	dynamodbTableName := os.Getenv("DYNAMODB_NAME")
 	awsRegion := os.Getenv("REGION")
-	client := dynamodb.GetClient(dynamodbTableName, awsRegion)
+	h.rudolphDynamoDBClient = dynamodb.GetClient(dynamodbTableName, awsRegion)
 	h.timeProvider = clock.ConcreteTimeProvider{}
 
-	h.sensorDataSaver = concreteSensorDataSaver{
-		putter: client,
-	}
-	h.machineConfigurationGetter = concreteMachineConfigurationGetter{
-		fetcher: machineconfiguration.GetMachineConfigurationService(client, h.timeProvider),
-	}
-	h.syncStateManager = concreteSyncStateManager{
-		getter: client,
-		putter: client,
-	}
+	h.stateTrackingService = getStateTrackingService(h.rudolphDynamoDBClient, h.timeProvider)
 
-	h.daysElapseUntilCleanSync = 7
+	h.cleanSyncService = getCleanSyncService(h.timeProvider)
+
+	h.machineConfigurationService = machineconfiguration.GetMachineConfigurationService(h.rudolphDynamoDBClient, h.timeProvider)
+
 	h.booted = true
 	return
 }
@@ -74,7 +67,6 @@ func (h *PostPreflightHandler) Handle(request events.APIGatewayProxyRequest) (*e
 		return errorResponse, nil
 	}
 	if err != nil {
-		log.Printf("error parsing request: %s", err.Error())
 		return response.APIResponse(http.StatusBadRequest, response.ErrInvalidBodyResponse)
 	}
 	return h.handlePreflight(machineID, preflightRequest)
@@ -82,94 +74,81 @@ func (h *PostPreflightHandler) Handle(request events.APIGatewayProxyRequest) (*e
 
 // The main controller function for API calls to /preflight
 func (h *PostPreflightHandler) handlePreflight(machineID string, preflightRequest *PreflightRequest) (*events.APIGatewayProxyResponse, error) {
-	err := h.sensorDataSaver.saveSensorDataFromRequest(h.timeProvider, machineID, preflightRequest)
+	// Here we figure out where to set the "feedSync" cursor in the newly created sync state
+	var feedSyncCursor string
+	var performCleanSync bool = false
+
+	// Save the state of the preflight request - this is the sensor state
+	err := h.stateTrackingService.saveSensorDataFromPreflightRequest(machineID, preflightRequest)
 	if err != nil {
-		log.Printf("error saving sensor data: %s", err.Error())
 		return response.APIResponse(http.StatusInternalServerError, response.ErrInternalServerErrorResponse)
 	}
 
-	// Get the config rules using the machineID from the preflight request
-	// if no results, GetDesiredConfig will return the global_config
-	machineConfiguration, err := h.machineConfigurationGetter.getDesiredConfig(machineID)
+	// Retrieve the intended configuration for the machine
+	machineConfiguration, err := h.machineConfigurationService.GetIntendedConfig(machineID)
 	if err != nil {
-		log.Printf("error getting desired config: %s", err.Error())
 		return response.APIResponse(http.StatusInternalServerError, response.ErrInternalServerErrorResponse)
 	}
 
 	// Get the previous sync state
-	prevSyncState, err := h.syncStateManager.getSyncState(machineID)
+	prevSyncState, err := h.stateTrackingService.getSyncState(machineID)
 	if err != nil {
-		log.Printf("error getting sync state: %s", err.Error())
 		return response.APIResponse(http.StatusInternalServerError, response.ErrInternalServerErrorResponse)
 	}
 
-	// Here we figure out where to set the "feedSync" cursor in the newly created sync state
-	var feedSyncCursor string
-	var doCleanSync bool = false
-
-	if !preflightRequest.RequestCleanSync {
-		// Check when the last preflight request took place
-		if prevSyncState != nil && prevSyncState.FeedSyncCursor != "" {
-			// Inherit the feed feed sync cursor from the previous sync state to kind of "pick up where it left off"
-			feedSyncCursor = prevSyncState.FeedSyncCursor
-		} else {
-			// If there is no previous sync state, or if no cursor exists, then we assume the client either
-			// has never sync'd before or something went horribly wrong. Always force it to clean sync and just set
-			// the feed sync cursor to "now"
-			feedSyncCursor = clock.RFC3339(h.timeProvider.Now())
-			doCleanSync = true
+	// Determine if a Clean sync should be performed based on the preflight request
+	// if the machine needs a perodic refresh
+	// or if the machine is new
+	switch preflightRequest.RequestCleanSync {
+	case true:
+		performCleanSync = true
+	case false:
+		// Retreive the current feed sync cursor
+		feedSyncCursor, performCleanSync = h.stateTrackingService.getFeedSyncStateCursor(prevSyncState)
+		// If a clean sync should be forced, break out and do it now
+		if performCleanSync {
+			break
 		}
-	}
-
-	// Re-queue for a clean sync if its been awhile >= daysElapseUntilCleanSync setting
-	// If prevSyncState has not happened yet or lastCleanSync is nil, perform a clean sync
-	if preflightRequest.RequestCleanSync {
-		doCleanSync = true
-	} else {
-		// If a clean sync was not explicitly requested, we instead figure out when the last one was
-		// and then force a clean sync if it hasn't happened in the last 7 days
-		daysSinceLastSync := daysSinceLastSync(h.timeProvider, prevSyncState)
-
-		// To reduce stampeding, we introduce a bit of dithering by using the machineID as the seed to randomize the number of days required to elapse before performing a clean sync.
-		// Given the same MachineID, performCleanSync will always provide the same chaos int and evenly space all clients out to require clean sync
-		// 7 days + 1d10 (Based on the MachineID input) * 10 minutes
-		shouldPerformCleanSync, err := shouldPerformCleanSync(machineID, daysSinceLastSync, h.daysElapseUntilCleanSync)
+		// Determine if a refresh clean sync should be performed
+		performCleanSync, err = h.cleanSyncService.determineCleanSync(
+			machineID,
+			preflightRequest,
+			prevSyncState,
+		)
 		if err != nil {
 			return response.APIResponse(http.StatusInternalServerError, err)
 		}
-
-		// Determine if a CleanSync is required
-		if shouldPerformCleanSync {
-			doCleanSync = true
-		}
+	default:
+		performCleanSync = true
 	}
 
 	// Set up a syncState object which will track the progress of the currently requested sync
 	// Here we use dynamodb:PutItem to restart the whole process, wipe out any previous sync
-	newLastCleanSync := ""
-	if doCleanSync {
-		newLastCleanSync = clock.RFC3339(h.timeProvider.Now())
-	} else if prevSyncState != nil {
-		newLastCleanSync = prevSyncState.LastCleanSync
+	var lastCleanSyncTime string
+	switch performCleanSync {
+	case true:
+		lastCleanSyncTime = clock.RFC3339(h.timeProvider.Now())
+	case false:
+		lastCleanSyncTime = prevSyncState.LastCleanSync
 	}
-	err = h.syncStateManager.saveNewSyncState(
-		h.timeProvider,
+
+	err = h.stateTrackingService.saveSyncState(
 		machineID,
 		// If the CleanSync is going to be forced, log this request in the SensorState, so we can indicate
 		// in the /ruledownload step which strategy to use
-		doCleanSync,
-		newLastCleanSync,
+		performCleanSync,
+		lastCleanSyncTime,
 		machineConfiguration.BatchSize,
 		feedSyncCursor,
 	)
+
 	if err != nil {
 		err = errors.Wrapf(err, "Encountered error trying to save new sync state")
-		log.Printf("error saving sync state: %s", err.Error())
 		return response.APIResponse(http.StatusInternalServerError, err)
 	}
 
 	// Construct the response
-	preflightResponse := ConstructPreflightResponse(machineConfiguration, doCleanSync)
+	preflightResponse := ConstructPreflightResponse(machineConfiguration, performCleanSync)
 	if err != nil {
 		return response.APIResponse(http.StatusInternalServerError, err)
 	}
