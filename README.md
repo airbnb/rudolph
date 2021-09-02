@@ -23,27 +23,52 @@ is rarely seen by end users of Santa-Rudolph, so we advise picking any random ch
 
 
 # Initial Setup
+First, you will need to [set up a new environment](deployments/environments/example/README.md).
 
-Create a new directory here:
+## Terraform Files
+Follow the instructions in the provided link and create all necessary Terraform configuration files. You will
+end up creating:
+
+* A new directory under `deployments/environments`
+* A `main.tf` symlink
+* A `variables.tf` symlink
+* A `versions.tf` file
+* A `_backend.tf` file
+* A `config.auto.tfvars.json` file
+
+## EXPORT your ENV
+When working with a specific deployment environment, always make sure your `ENV` environment variable is set
+properly.
+
+For example, to direct commands at the `deployments/environment/example` environment, you would use:
+```
+export ENV=example
+```
+
+## Install Dependencies
+Download and install all golang dependencies with:
 
 ```
-deployments/environments/{{ENV}}
+make deps
 ```
 
-Note down the value of `{{ENV}}`, this will be referred to as your "environment" and you will need this handy any time
-deployments are made.
-
-Under this directory, create two symlinks:
+## Build and Deploy
+You can deploy your entire application now. Do not forget to authenticate with aws-cli.
 
 ```
-ln -s deployments/terraform_modules/default_main.tf deployments/environments/{{ENV}}/main.tf
-ln -s deployments/terraform_modules/default_variables.tf deployments/environments/{{ENV}}/variables.tf
+make deploy
 ```
 
-Create a configuration file named `config.auto.tfvars.json`.
+## Test it Out
+Make an HTTP POST request to your new deployment. The request should hit a URL that looks something like:
 
-Create a `versions.tf`
+HTTP POST
+https://{{PREFIX}}-rudolph.{YOUR_DOMAIN_NAME}/preflight/AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE
+Headers:
+Content-Type: application/json
+Accept: application/json
+{}
 
-Create a `_backend.tf`
 
-TBD
+# Deploying & Configuring Santa Agents
+

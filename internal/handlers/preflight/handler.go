@@ -1,6 +1,7 @@
 package preflight
 
 import (
+	"log"
 	"net/http"
 	"os"
 
@@ -73,6 +74,7 @@ func (h *PostPreflightHandler) Handle(request events.APIGatewayProxyRequest) (*e
 		return errorResponse, nil
 	}
 	if err != nil {
+		log.Printf("error parsing request: %s", err.Error())
 		return response.APIResponse(http.StatusBadRequest, response.ErrInvalidBodyResponse)
 	}
 	return h.handlePreflight(machineID, preflightRequest)
@@ -82,6 +84,7 @@ func (h *PostPreflightHandler) Handle(request events.APIGatewayProxyRequest) (*e
 func (h *PostPreflightHandler) handlePreflight(machineID string, preflightRequest *PreflightRequest) (*events.APIGatewayProxyResponse, error) {
 	err := h.sensorDataSaver.saveSensorDataFromRequest(h.timeProvider, machineID, preflightRequest)
 	if err != nil {
+		log.Printf("error saving sensor data: %s", err.Error())
 		return response.APIResponse(http.StatusInternalServerError, response.ErrInternalServerErrorResponse)
 	}
 
@@ -89,12 +92,14 @@ func (h *PostPreflightHandler) handlePreflight(machineID string, preflightReques
 	// if no results, GetDesiredConfig will return the global_config
 	machineConfiguration, err := h.machineConfigurationGetter.getDesiredConfig(machineID)
 	if err != nil {
+		log.Printf("error getting desired config: %s", err.Error())
 		return response.APIResponse(http.StatusInternalServerError, response.ErrInternalServerErrorResponse)
 	}
 
 	// Get the previous sync state
 	prevSyncState, err := h.syncStateManager.getSyncState(machineID)
 	if err != nil {
+		log.Printf("error getting sync state: %s", err.Error())
 		return response.APIResponse(http.StatusInternalServerError, response.ErrInternalServerErrorResponse)
 	}
 
@@ -159,6 +164,7 @@ func (h *PostPreflightHandler) handlePreflight(machineID string, preflightReques
 	)
 	if err != nil {
 		err = errors.Wrapf(err, "Encountered error trying to save new sync state")
+		log.Printf("error saving sync state: %s", err.Error())
 		return response.APIResponse(http.StatusInternalServerError, err)
 	}
 
