@@ -19,4 +19,6 @@ module "santa_api" {
 
   lambda_zip      = var.zip_file_path
   package_version = var.package_version
+
+  enable_s3_logging = var.enable_s3_logging
 }

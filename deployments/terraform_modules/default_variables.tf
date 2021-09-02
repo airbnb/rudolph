@@ -63,3 +63,8 @@ variable "eventupload_output_lambda_name" {
   type = string
   default = ""
 }
+
+variable "enable_s3_logging" {
+  type = bool
+  default = true
+}

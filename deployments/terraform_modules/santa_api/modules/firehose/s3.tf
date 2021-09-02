@@ -1,6 +1,7 @@
 locals {
-  source_bucket_name     = "${var.prefix}-rudolph-events"
-  s3_logging_bucket_name = var.existing_logging_bucket_name != "" ? var.existing_logging_bucket_name : "${local.source_bucket_name}-logging"
+  source_bucket_name       = "${var.prefix}-rudolph-events"
+  s3_logging_bucket_name   = var.existing_logging_bucket_name != "" ? var.existing_logging_bucket_name : "${local.source_bucket_name}-logging"
+  create_s3_logging_bucket = var.enable_logging && var.existing_logging_bucket_name == ""
 }
 
 #
@@ -8,7 +9,7 @@ locals {
 #
 
 resource "aws_s3_bucket" "s3_logging" {
-  count = var.existing_logging_bucket_name == "" ? 1 : 0
+  count = local.create_s3_logging_bucket ? 1 : 0
 
   bucket = local.s3_logging_bucket_name
   acl    = "log-delivery-write"
