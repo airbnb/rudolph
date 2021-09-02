@@ -29,6 +29,11 @@ variable "aws_account_id" {
   description = "AWS Account Id"
 }
 
+variable "org" {
+  type        = string
+  description = "Organization name"
+}
+
 variable "stage_name" {
   type        = string
   description = "Name of stage to use for this deployment"

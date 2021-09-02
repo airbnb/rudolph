@@ -3,7 +3,7 @@
 #
 
 locals {
-  source_bucket_name       = "${var.prefix}-rudolph-source"
+  source_bucket_name       = "${var.prefix}-${var.org}-rudolph-source"
   s3_logging_bucket_name   = var.existing_logging_bucket_name != "" ? var.existing_logging_bucket_name : "${local.source_bucket_name}-logging"
   create_s3_logging_bucket = var.enable_logging && var.existing_logging_bucket_name == ""
 }

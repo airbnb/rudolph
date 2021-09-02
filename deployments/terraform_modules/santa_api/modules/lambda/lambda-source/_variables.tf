@@ -13,3 +13,8 @@ variable "existing_logging_bucket_name" {
   description = "Name of existing S3 bucket to use for storing access logs. The default of an empty string will result in a bucket being created"
   default     = ""
 }
+
+variable "org" {
+  type        = string
+  description = "Organization name"
+}

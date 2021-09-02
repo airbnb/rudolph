@@ -10,6 +10,7 @@ module "firehose" {
   source = "./modules/firehose"
 
   prefix         = var.prefix
+  org            = var.org
   aws_account_id = var.aws_account_id
   region         = var.region
 

@@ -15,6 +15,7 @@ module "lambda_source" {
 
   source                       = "./modules/lambda/lambda-source"
   prefix                       = var.prefix
+  org                          = var.org
   existing_logging_bucket_name = var.existing_logging_bucket_name
   enable_logging               = var.enable_s3_logging
 }

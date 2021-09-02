@@ -34,3 +34,8 @@ variable "firehose_upload_lambda_role_names" {
   type        = list(string)
   description = "List of Lambda role names that should be allowed to write and upload to Firehose"
 }
+
+variable "org" {
+  type        = string
+  description = "Organization name"
+}

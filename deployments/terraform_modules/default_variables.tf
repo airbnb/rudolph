@@ -17,6 +17,11 @@ variable "aws_account_id" {
   type    = string
 }
 
+variable "org" {
+  type        = string
+  description = "A lowercase string unique to your organization. Used to deduplicate certain AWS resources."
+}
+
 variable "stage_name" {
   type        = string
   description = "Name of stage to use for this deployment"

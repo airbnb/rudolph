@@ -2,6 +2,7 @@ module "santa_api" {
   source = "../../terraform_modules/santa_api"
 
   prefix                             = var.prefix
+  org                                = var.org
   region                             = var.region
   aws_account_id                     = var.aws_account_id
   stage_name                         = var.stage_name
