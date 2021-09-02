@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/airbnb/rudolph/pkg/handlers/authorizer"
+	"github.com/airbnb/rudolph/internal/handlers/authorizer"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 

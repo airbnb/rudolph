@@ -4,12 +4,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/airbnb/rudolph/pkg/handlers/eventupload"
-	"github.com/airbnb/rudolph/pkg/handlers/health"
-	"github.com/airbnb/rudolph/pkg/handlers/postflight"
-	"github.com/airbnb/rudolph/pkg/handlers/preflight"
-	"github.com/airbnb/rudolph/pkg/handlers/ruledownload"
-	"github.com/airbnb/rudolph/pkg/handlers/xsrf"
+	"github.com/airbnb/rudolph/internal/handlers/eventupload"
+	"github.com/airbnb/rudolph/internal/handlers/health"
+	"github.com/airbnb/rudolph/internal/handlers/postflight"
+	"github.com/airbnb/rudolph/internal/handlers/preflight"
+	"github.com/airbnb/rudolph/internal/handlers/ruledownload"
+	"github.com/airbnb/rudolph/internal/handlers/xsrf"
 	"github.com/airbnb/rudolph/pkg/response"
 	"github.com/aws/aws-lambda-go/events"
 )

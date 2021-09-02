@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/airbnb/rudolph/pkg/handlers"
+	"github.com/airbnb/rudolph/internal/handlers"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
