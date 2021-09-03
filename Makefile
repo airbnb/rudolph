@@ -10,14 +10,8 @@ DEPLOYMENT_ZIP_PATH = $(PKG_DIR)/deployment.zip
 TERRAFORM_DEPLOYMENTS_DIR = $(PWD)/deployments/environments
 TF_DEFAULT_FLAGS = --var zip_file_path="$(PWD)/$(DEPLOYMENT_ZIP_PATH)" --var package_version=$(VERSION)
 LDFLAGS=-ldflags="-X main.version=$(VERSION)"
-
-# HANDLERS should be a list of the name of dirs in internal/endpoints/ to be built
-# HANDLERS = authorizer health ruledownload preflight
-#
-# HANDLERS are stored under the defined HANDLERS_DIR folder
-# HANDLERS_DIR contains all of the lambda handers
-HANDLERS_DIR = internal/endpoints
-HANDLERS = $(shell find $(HANDLERS_DIR) -type d -mindepth 1 -maxdepth 1 -exec basename {} \;)
+APPS_DIR = ./cmd
+APPS = $(shell find $(APPS_DIR) -type d -mindepth 1 -maxdepth 1 -exec basename {} \;)
 
 # Check to ensure the prefix is being passed in as an arg like `ENV=<YOUR_ENVIRONMENT>`
 # or is set using environment variables like `export ENV=<YOUR_ENVIRONMENT>`
@@ -92,9 +86,9 @@ deps:
 #
 build: clean deps
 	$(info *** building endpoints)
-	@for handler in $(HANDLERS); do \
-		echo "building $$handler function: $(LINUX_BUILD_DIR)/$$handler" ; \
-		GOOS=linux GOARCH=amd64 go build -o $(LINUX_BUILD_DIR)/$$handler ./internal/endpoints/$$handler ; \
+	@for app in $(APPS); do \
+		echo "building $$app function: $(LINUX_BUILD_DIR)/$$app" ; \
+		GOOS=linux GOARCH=amd64 go build -o $(LINUX_BUILD_DIR)/$$app ./$(APPS_DIR)/$$app ; \
 	done
 
 # zips up the compiled binaries into .zip files, ready to upload to AWS S3
