@@ -3,7 +3,7 @@ package flags
 import (
 	"errors"
 
-	"github.com/airbnb/rudolph/cmd/cli/santa_sensor"
+	"github.com/airbnb/rudolph/internal/cli/santa_sensor"
 	"github.com/airbnb/rudolph/pkg/types"
 	"github.com/spf13/cobra"
 )

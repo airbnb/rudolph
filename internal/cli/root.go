@@ -1,14 +1,14 @@
-package main
+package cli
 
 import (
 	"os"
 
-	"github.com/airbnb/rudolph/cmd/cli/config"
-	"github.com/airbnb/rudolph/cmd/cli/info"
-	"github.com/airbnb/rudolph/cmd/cli/lookup"
-	"github.com/airbnb/rudolph/cmd/cli/repair"
-	"github.com/airbnb/rudolph/cmd/cli/rule"
-	"github.com/airbnb/rudolph/cmd/cli/rules"
+	"github.com/airbnb/rudolph/internal/cli/config"
+	"github.com/airbnb/rudolph/internal/cli/info"
+	"github.com/airbnb/rudolph/internal/cli/lookup"
+	"github.com/airbnb/rudolph/internal/cli/repair"
+	"github.com/airbnb/rudolph/internal/cli/rule"
+	"github.com/airbnb/rudolph/internal/cli/rules"
 	"github.com/spf13/cobra"
 )
 

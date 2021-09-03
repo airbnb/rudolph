@@ -1,7 +1,7 @@
 package rule
 
 import (
-	"github.com/airbnb/rudolph/cmd/cli/flags"
+	"github.com/airbnb/rudolph/internal/cli/flags"
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/types"
@@ -12,24 +12,25 @@ func init() {
 	tf := flags.TargetFlags{}
 	rf := flags.RuleInfoFlags{}
 
-	var ruleAllowCmd = &cobra.Command{
-		Use:   "allow [-f <file-path>|-s <sha>] -t <rule-type> [-m <machine-id>|--global]",
-		Short: "Create a rule that applies the Allowlist policy to the specified file",
-		Args:  cobra.NoArgs,
+	var ruleDenyCmd = &cobra.Command{
+		Use:     "deny <file-path>",
+		Aliases: []string{"block"},
+		Short:   "Create a rule that applies the Blocklist policy to the specified file",
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-
+			// args[0] has already been validated as a file before this
 			region, _ := cmd.Flags().GetString("region")
 			table, _ := cmd.Flags().GetString("dynamodb_table")
 
 			dynamodbClient := dynamodb.GetClient(table, region)
 			time := clock.ConcreteTimeProvider{}
 
-			return applyPolicyForPath(time, dynamodbClient, types.Allowlist, tf, rf)
+			return applyPolicyForPath(time, dynamodbClient, types.Blocklist, tf, rf)
 		},
 	}
 
-	tf.AddTargetFlags(ruleAllowCmd)
-	rf.AddRuleInfoFlags(ruleAllowCmd)
+	tf.AddTargetFlags(ruleDenyCmd)
+	rf.AddRuleInfoFlags(ruleDenyCmd)
 
-	RuleCmd.AddCommand(ruleAllowCmd)
+	RuleCmd.AddCommand(ruleDenyCmd)
 }

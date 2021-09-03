@@ -11,7 +11,6 @@ TERRAFORM_DEPLOYMENTS_DIR = $(PWD)/deployments/environments
 TF_DEFAULT_FLAGS = --var zip_file_path="$(PWD)/$(DEPLOYMENT_ZIP_PATH)" --var package_version=$(VERSION)
 LDFLAGS=-ldflags="-X main.version=$(VERSION)"
 APPS_DIR = ./cmd
-APPS = $(shell find $(APPS_DIR) -type d -mindepth 1 -maxdepth 1 -exec basename {} \;)
 
 # Check to ensure the prefix is being passed in as an arg like `ENV=<YOUR_ENVIRONMENT>`
 # or is set using environment variables like `export ENV=<YOUR_ENVIRONMENT>`
@@ -43,7 +42,7 @@ plan: .check-args
 # Equivalent to a `terraform init` in the desired environment directory.
 # Required upon first deployment and when the tf state drifts too far from the local cached state.
 #
-tf-init: .check-args
+init: .check-args
 	terraform -chdir=$(TERRAFORM_DEPLOYMENTS_ENV_DIR) init
 
 # Destroys the current deployment
@@ -85,11 +84,13 @@ deps:
 # We use linux amd64 binaries so AWS Lambda can run them
 #
 build: clean deps
-	$(info *** building endpoints)
-	@for app in $(APPS); do \
-		echo "building $$app function: $(LINUX_BUILD_DIR)/$$app" ; \
-		GOOS=linux GOARCH=amd64 go build -o $(LINUX_BUILD_DIR)/$$app ./$(APPS_DIR)/$$app ; \
-	done
+	$(info *** building application binaries...)
+	echo "building api binary: $(LINUX_BUILD_DIR)/api"
+	GOOS=linux GOARCH=amd64 go build -o $(LINUX_BUILD_DIR)/api $(APPS_DIR)/api
+	echo "building authorizer binary: $(LINUX_BUILD_DIR)/authorizer"
+	GOOS=linux GOARCH=amd64 go build -o $(LINUX_BUILD_DIR)/authorizer $(APPS_DIR)/authorizer
+	GOOS=darwin go build -o $(MACOS_BUILD_DIR)/cli ./$(APPS_DIR)/cli
+	ln -sf $(MACOS_BUILD_DIR)/cli ./$(CLI_NAME)
 
 # zips up the compiled binaries into .zip files, ready to upload to AWS S3
 #
@@ -108,11 +109,3 @@ test:
 #
 #
 .PHONY: .check-args deploy tf-init destroy clean docs deps build package test
-
-# Builds
-#
-#
-cli: clean deps
-	$(info *** building rudolph CLI and symlinking to current directory)
-	GOOS=darwin go build -v -o $(MACOS_BUILD_DIR)/$(CLI_NAME) $(LDFLAGS) ./cmd/cli
-	ln -sf $(MACOS_BUILD_DIR)/$(CLI_NAME) ./$(CLI_NAME)

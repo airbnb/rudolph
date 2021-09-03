@@ -3,7 +3,7 @@ package info
 import (
 	"fmt"
 
-	"github.com/airbnb/rudolph/cmd/cli/santa_sensor"
+	"github.com/airbnb/rudolph/internal/cli/santa_sensor"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
