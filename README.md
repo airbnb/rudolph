@@ -62,6 +62,7 @@ make deploy
 ## Test it Out
 Make an HTTP POST request to your new deployment. The request should hit a URL that looks something like:
 
+```
 POST /preflight/AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE
 Host: {{PREFIX}}-rudolph.{YOUR_DOMAIN_NAME}
 content-type:application/json
@@ -69,6 +70,7 @@ accept:*/*
 {
   "serial_num": "1234"
 }
+```
 
 
 # Deploying & Configuring Santa Agents

@@ -3,7 +3,7 @@
 #
 
 locals {
-  handler = var.lambda_handler == "" ? "build/linux/${var.endpoint}" : var.lambda_handler
+  handler = var.lambda_handler == "" ? "${var.endpoint}" : var.lambda_handler
 }
 
 

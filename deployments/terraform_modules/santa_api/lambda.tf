@@ -37,7 +37,7 @@ module "health_function" {
   lambda_source_bucket      = aws_s3_bucket_object.santa_api_source.bucket
   lambda_source_key         = aws_s3_bucket_object.santa_api_source.key
   lambda_source_hash        = local.lambda_source_hash
-  lambda_handler            = "build/linux/api"
+  lambda_handler            = "api"
   endpoint                  = "health"
   api_gateway_execution_arn = aws_api_gateway_rest_api.api_gateway.execution_arn
 
@@ -57,7 +57,7 @@ module "xsrf_function" {
   lambda_source_bucket      = aws_s3_bucket_object.santa_api_source.bucket
   lambda_source_key         = aws_s3_bucket_object.santa_api_source.key
   lambda_source_hash        = local.lambda_source_hash
-  lambda_handler            = "build/linux/api"
+  lambda_handler            = "api"
   endpoint                  = "xsrf"
   api_gateway_execution_arn = aws_api_gateway_rest_api.api_gateway.execution_arn
 
@@ -74,7 +74,7 @@ module "preflight_function" {
   lambda_source_bucket      = aws_s3_bucket_object.santa_api_source.bucket
   lambda_source_key         = aws_s3_bucket_object.santa_api_source.key
   lambda_source_hash        = local.lambda_source_hash
-  lambda_handler            = "build/linux/api"
+  lambda_handler            = "api"
   endpoint                  = "preflight"
   api_gateway_execution_arn = aws_api_gateway_rest_api.api_gateway.execution_arn
 
@@ -94,7 +94,7 @@ module "eventupload_function" {
   lambda_source_bucket      = aws_s3_bucket_object.santa_api_source.bucket
   lambda_source_key         = aws_s3_bucket_object.santa_api_source.key
   lambda_source_hash        = local.lambda_source_hash
-  lambda_handler            = "build/linux/api"
+  lambda_handler            = "api"
   endpoint                  = "eventupload"
   api_gateway_execution_arn = aws_api_gateway_rest_api.api_gateway.execution_arn
 
@@ -117,7 +117,7 @@ module "ruledownload_function" {
   lambda_source_bucket      = aws_s3_bucket_object.santa_api_source.bucket
   lambda_source_key         = aws_s3_bucket_object.santa_api_source.key
   lambda_source_hash        = local.lambda_source_hash
-  lambda_handler            = "build/linux/api"
+  lambda_handler            = "api"
   endpoint                  = "ruledownload"
   api_gateway_execution_arn = aws_api_gateway_rest_api.api_gateway.execution_arn
 
@@ -137,7 +137,7 @@ module "postflight_function" {
   lambda_source_bucket      = aws_s3_bucket_object.santa_api_source.bucket
   lambda_source_key         = aws_s3_bucket_object.santa_api_source.key
   lambda_source_hash        = local.lambda_source_hash
-  lambda_handler            = "build/linux/api"
+  lambda_handler            = "api"
   endpoint                  = "postflight"
   api_gateway_execution_arn = aws_api_gateway_rest_api.api_gateway.execution_arn
 
