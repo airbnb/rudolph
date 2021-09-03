@@ -120,5 +120,5 @@ test:
 #
 cli: clean deps
 	$(info *** building rudolph CLI and symlinking to current directory)
-	GOOS=darwin go build -v -o $(MACOS_BUILD_DIR)/$(CLI_NAME) $(LDFLAGS)
+	GOOS=darwin go build -v -o $(MACOS_BUILD_DIR)/$(CLI_NAME) $(LDFLAGS) ./cmd/cli
 	ln -sf $(MACOS_BUILD_DIR)/$(CLI_NAME) ./$(CLI_NAME)
