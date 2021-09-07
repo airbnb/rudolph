@@ -71,6 +71,12 @@ build: deps
 test:
 	go test -cover -v ./...
 
+# Initializes the environment directory and files
+#
+#
+init-env: .check-args
+	@sh -c "'$(CURDIR)/scripts/new_env.sh' $(ENV)"
+
 #
 #
 #

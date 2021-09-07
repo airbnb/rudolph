@@ -11,25 +11,50 @@ variable "package_version" {
 // These variables are provided by config.auto.tfvars.json
 variable "region" {
   type    = string
+
+  validation {
+    condition     = can(regex("[a-z0-9\\-]+", var.region))
+    error_message = "The aws region is not valid."
+  }
 }
 
 variable "aws_account_id" {
   type    = string
+
+  validation {
+    condition     = can(regex("[0-9]+", var.aws_account_id))
+    error_message = "The aws_account_id should be a number."
+  }
 }
 
 variable "org" {
   type        = string
   description = "A lowercase string unique to your organization. Used to deduplicate certain AWS resources."
+
+  validation {
+    condition     = can(regex("[a-z0-9\\-]+", var.org))
+    error_message = "The org value must contain only lowercase alphanumeric characters or dashes."
+  }
 }
 
 variable "stage_name" {
   type        = string
   description = "Name of stage to use for this deployment"
+
+  validation {
+    condition     = can(regex("[a-z\\-]+", var.stage_name))
+    error_message = "The stage value must contain only lowercase alphabet characters."
+  }
 }
 
 variable "prefix" {
   type        = string
   description = "Unique prefix to use for resources. This gets passed in from 'make deploy' command"
+
+  validation {
+    condition     = can(regex("[a-z0-9\\-]+", var.prefix))
+    error_message = "The prefix value must contain only lowercase alphanumeric characters or dashes."
+  }
 }
 
 variable "allowed_inbound_ips" {

@@ -2,28 +2,25 @@
 It is easy to deploy and maintain multiple different Rudolph environments, as they are configured in just 5 simple files.
 This document will walk through the 5 files necessary.
 
+## `init-env`
+The easiest way to create skeletons for all necessary files is via:
+
+```
+make init-env
+```
+
 ## The Directory
-You will need a directory under `deployments/environments/{{ENV}}/`. For example, this current environment's `ENV` is "example",
-as it is located at `deployments/environment/example`.
+You will need a directory under `deployments/environments/{{ENV}}/`. For example, this current environment's `ENV` is "example", as it is located at `deployments/environment/example`.
 
-### `variables.tf`
-Start by creating a symlink.
+### `_variables.tf`
+This file is a symlink to [deployments/terraform_modules/default_variables.tf](deployments/terraform_modules/default_variables.tf).
 
-```
-% cd deployemnts/environments/{{ENV}}
-% ln -s ../../terraform_modules/default_variables.tf ./variables.tf
-```
-
-You will never need to edit this variables file. Leave it as-is.
+You will never need to edit this variables file after creating the symlink. Leave it as-is.
 
 ### `main.tf`
+This file is a symlink to [deployments/terraform_modules/default_main.tf](deployments/terraform_modules/default_main.tf).
 
-```
-% cd deployemnts/environments/{{ENV}}
-% ln -s ../../terraform_modules/default_main.tf ./main.tf
-```
-
-You will never need to edit this main file. Leave it as-is.
+You will never need to edit this main file after creating the symlink. Leave it as-is.
 
 ### `versions.tf`
 Create a `versions.tf` in the environment directory with the appropriate versions. We recommend the following:
@@ -95,6 +92,7 @@ Consider this provided example:
 ```
 {
   "aws_account_id": "001122334455",
+  "org": "acme",
   "prefix": "production",
   "stage_name": "prod",
   "region": "us-west-2",
@@ -110,6 +108,10 @@ Consider this provided example:
 #### `aws_account_id`
 Your AWS account's ID.
 
+#### `org`
+This string should be unique to your team or organization. This is used to prevent certain AWS resource Id collisions.
+It is highly recomended to be universally unique.
+
 #### `prefix`
 This string prefixes all AWS resource names and identifiers so you can distinguish between different deployment
 environments within the same AWS account. It must be unique within a given AWS Account, and it is highly recommended
@@ -122,7 +124,7 @@ This is used for your Lambda aliases and your API Gateway stage names. You can j
 The AWS region, which must match the previous 2 aws regions.
 
 #### `eventupload_handler`
-It takes a value of `NONE`, `KINESIS`, or `FIREHOSE`.
+It takes a value of `NONE`, `KINESIS`, or `FIREHOSE`. Use `"NONE"` if you do not intend to send events anywhere.
 
 #### `eventupload_autocreate_policies`
 If `true` Rudolph will automatically create sufficient IAM policies to the specified kinesis stream or firehose.
@@ -139,4 +141,5 @@ if you share the Hosted Zone between environments, as it becomes managed by Terr
 may accidentally destroy a Hosted Zone that's currently in use by another environment.
 
 #### `eventupload_output_lambda_name`
-An AWS Lambda Function name in the same region to forward `/eventupload` events to.
+An AWS Lambda Function name in the same region to forward `/eventupload` events to. Leave as `""` if you do not intend
+to use this feature.
