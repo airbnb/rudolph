@@ -31,8 +31,8 @@ Follow the instructions in the provided link and create all necessary Terraform 
 end up creating:
 
 * A new directory under `deployments/environments`
-* A `main.tf` symlink
-* A `variables.tf` symlink
+* A `main.tf` symlink --> Under the newly created environment folder : `ln ../default_main.tf ./main.tf`
+* A `variables.tf` symlink --> Under the newly created environment folder : `ln ../default_variables.tf ./variables.tf`
 * A `versions.tf` file
 * A `_backend.tf` file
 * A `config.auto.tfvars.json` file
