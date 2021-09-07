@@ -25,3 +25,26 @@ A sample output is provided below:
 
 ## Rules Database
 The rules database is a db file, located at /var/db/santa/rules.db. It contains a database of all rules.
+
+
+## Importing or Exporting Rules
+Rudolph comes with a handy CLI tool. One of the useful commands is to import/export rules to/from a csv file.
+
+You will first need to build the command line utility:
+
+```
+make build
+```
+
+Once it is built, it will be available at `./rudolph`.
+
+```
+export ENV=YOURENV
+./rudolph rules export -f /path/to/rules.csv
+```
+
+```
+export ENV=YOURENV
+./rudolph rules import -f /path/to/rules.csv
+```
+
