@@ -7,7 +7,13 @@ Rudolph is built in Amazon Web Services, and utilizes exclusively serverless com
 # Deployment
 
 ## Step 1) Deploy Rudolph
+Start by deploying rudolph ([docs/deploy.md](docs/deploy.md)).
 
 
+## Step 2) Deploying Santa Agents
+Next, deploy and configure your Santa sensors ([docs/configuring-santa.md](docs/configuring-santa.md)).
 
-# Deploying & Configuring Santa Agents
+
+## Step 3) Deploy Rules
+Use the cli to sync rules ([docs/rules.md](docs/rules.md)).
+
