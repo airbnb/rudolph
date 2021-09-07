@@ -39,6 +39,9 @@ func init() {
 	}
 
 	tf.AddTargetFlagsRules(RulesCmd)
+
+	addRuleExportCommand()
+	addRuleImportCommand()
 }
 
 func rules(client dynamodb.QueryAPI, tf flags.TargetFlags, limit int) error {
