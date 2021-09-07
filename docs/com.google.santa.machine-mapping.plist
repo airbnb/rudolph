@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>MachineUUID</key>
+    <string>AAAABBBB-CCCC-DDDD-1234-12345678FFFF</string>
+    <key>Owner</key>
+    <string>derek_wang</string>
+  </dict>
+</plist>

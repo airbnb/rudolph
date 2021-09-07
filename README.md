@@ -1,77 +1,32 @@
 # Rudolph
 Rudolph is the control server counterpart of [Santa](https://github.com/google/santa), and is used to rapidly deploy configurations to Santa agents.
 
-Rudolph is built in Amazon Web Services, and utilizes exclusively serverless components to reduce operational burden. It is designed to be fast,
-easy-to-use, low-maintenance, and cost-conscious.
+Rudolph is built in Amazon Web Services, and utilizes exclusively serverless components to reduce operational burden. It is designed to be fast, easy-to-use, low-maintenance, and cost-conscious.
 
-# Getting Ready
+## Who is Rudolph For?
+Rudolph is built for teams interested in deploying [Santa](https://github.com/google/santa) to implement Binary Authorization
+on MacOS environments. In particular, it is designed to support Santa in **Lockdown Mode**.
 
-## Golang
-You will need golang version 1.15+ installed. Go get it from [the golang website](https://golang.org/dl/).
+Addtionally, Rudolph uses Amazon Web Services and is ideal for teams that are too small to stand up or maintain more
+sophisticated environments.
 
-## Amazon Web Services
-You will need an AWS account handy, as well as an IAM role with sufficient privileges.
-
-## Terraform
-You will need Terraform v0.14+ installed. We recommend using [tfenv](https://github.com/tfutils/tfenv).
-
-## Registered Domain
-You will need a registered DNS domain name for Rudolph's API server.
-
-Purchasing a domain is very easy, simply use use AWS's Route 53 service to register a new domain. The exact URL
-is rarely seen by end users of Santa-Rudolph, so we advise picking any random cheap one to start things up quickly.
+* Easy deployment: Set up the entire stack in 20 minutes. Tear it down in 1 minute
+* (Almost) Zero maintaintence
+* Proven scalability & cost-efficiency
+* Scales up and down automatically
+* High performance; Rudolph is _designed_ to support 60-second sync intervals on Santa sensors, for real-time unblocking
 
 
-# Initial Setup
-First, you will need to [set up a new environment](deployments/environments/example/README.md).
+# Deployment
 
-## Terraform Files
-Follow the instructions in the provided link and create all necessary Terraform configuration files. You will
-end up creating:
-
-* A new directory under `deployments/environments`
-* A `main.tf` symlink
-* A `variables.tf` symlink
-* A `versions.tf` file
-* A `_backend.tf` file
-* A `config.auto.tfvars.json` file
-
-## EXPORT your ENV
-When working with a specific deployment environment, always make sure your `ENV` environment variable is set
-properly.
-
-For example, to direct commands at the `deployments/environment/example` environment, you would use:
-```
-export ENV=example
-```
-
-## Install Dependencies
-Download and install all golang dependencies with:
-
-```
-make deps
-```
-
-## Build and Deploy
-You can deploy your entire application now. Do not forget to authenticate with aws-cli.
-
-```
-make deploy
-```
-
-## Test it Out
-Make an HTTP POST request to your new deployment. The request should hit a URL that looks something like:
-
-```
-POST /preflight/AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE
-Host: {{PREFIX}}-rudolph.{YOUR_DOMAIN_NAME}
-content-type:application/json
-accept:*/*
-{
-  "serial_num": "1234"
-}
-```
+## Step 1) Deploy Rudolph
+Start by deploying rudolph ([docs/deploy.md](docs/deploy.md)).
 
 
-# Deploying & Configuring Santa Agents
+## Step 2) Deploying Santa Agents
+Next, deploy and configure your Santa sensors ([docs/configuring-santa.md](docs/configuring-santa.md)).
+
+
+## Step 3) Deploy Rules
+Use the cli to sync rules ([docs/rules.md](docs/rules.md)).
 
