@@ -47,7 +47,7 @@ func RemoveGlobalRule(timeProvider clock.TimeProvider, getter dynamodb.GetItemAP
 	// DynamoDB Idempotency Keys may be 1-32 character length
 	// https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TransactWriteItems.html#API_TransactWriteItems_RequestSyntax
 	// If one is not provided, generate one
-	if len(txnIdempotencyKey) < 0 || len(txnIdempotencyKey) > 32 {
+	if len(txnIdempotencyKey) == 0 || len(txnIdempotencyKey) > 32 {
 		txnIdempotencyKey = uuid.NewString()
 	}
 	_, err = transacter.TransactWriteItems(txnItems, &txnIdempotencyKey)
