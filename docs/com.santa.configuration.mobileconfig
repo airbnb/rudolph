@@ -20,12 +20,12 @@
 								<integer>1</integer>
 								<key>EnablePageZeroProtection</key>
 								<false/>
-								<key>EnableBackwardsCompatibleContentEncoding</key>
-								<false/>
 								<key>SyncBaseURL</key>
 								<string>https://rudolph-server.acme.corp/</string>
+                <key>MoreInfoURL</key>
+								<string>https://rudolph-controller.acme.corp/moreinfo</string>
 								<key>EventDetailText</key>
-								<string>Allow me?</string>
+								<string>Next Steps...</string>
 								<key>EventDetailURL</key>
 								<string>https://rudolph-controller.acme.corp/event/%machine_id%/%file_sha%</string>
 								<key>FileChangesRegex</key>
@@ -42,18 +42,10 @@
 								<string>/Library/Preferences/com.google.santa.machine-mapping.plist</string>
 								<key>ModeNotificationLockdown</key>
 								<string>Entering Lockdown mode</string>
-								<key>FullSyncInterval</key>
-								<integer>10</integer>
 								<key>ModeNotificationMonitor</key>
 								<string>Entering Monitor mode.Please be careful!</string>
 								<key>UnknownBlockMessage</key>
 								<string>This application has been blocked from executing.</string>
-								<key>FCMProject</key>
-								<string>com.google.santa</string>
-								<key>FCMEntity</key>
-								<string>1024387877057</string>
-								<key>FCMAPIKey</key>
-								<string>AAAA7oJGiME:APA91bFQnRvNdHGU-Pb2OIqrAM38u34qJ4sQGIHaaLN70kyaUuNzKHyAoBp67fZNilm1yXifyeAGq31jyD97gNHKScvhxL-Zead-5ECj2_DGIdlVkH-c9qk6D9xyZ-aMtket60Bxrf4a</string>
 							</dict>
 						</dict>
 					</array>
