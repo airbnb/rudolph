@@ -39,3 +39,9 @@ variable "org" {
   type        = string
   description = "Organization name"
 }
+
+variable "kms_key_administrators_arns" {
+  type = list(string)
+  description = "List of KMS Key Administrator ARNs to allow access to Rudolph KMS key operations"
+  default = []
+}

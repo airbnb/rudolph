@@ -73,6 +73,7 @@ data "aws_iam_policy_document" "store_sse_permissions" {
 
     resources = ["*"]
   }
+
   statement {
     sid       = "Allow access for root user"
     effect    = "Allow"

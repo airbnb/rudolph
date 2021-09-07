@@ -71,7 +71,7 @@ data "aws_iam_policy_document" "rudolph_eventsupload_kms_key_policy" {
   }
 
   statement {
-    sid       = "Allow access for Key Administrators"
+    sid       = "Allow access for root user"
     effect    = "Allow"
     actions   = [
       "kms:Create*",
@@ -103,6 +103,43 @@ data "aws_iam_policy_document" "rudolph_eventsupload_kms_key_policy" {
       ]
     }
   }
+
+  dynamic "statement" {
+    for_each = length(var.kms_key_administrators_arns) == 0 ? [] : [1]
+
+    content {
+      sid       = "Allow access for Key Administrators"
+      effect    = "Allow"
+      actions   = [
+        "kms:Create*",
+        "kms:Describe*",
+        "kms:Enable*",
+        "kms:List*",
+        "kms:Put*",
+        "kms:Update*",
+        "kms:Revoke*",
+        "kms:Disable*",
+        "kms:Get*",
+        "kms:Delete*",
+        "kms:TagResource",
+        "kms:UntagResource",
+        "kms:ScheduleKeyDeletion",
+        "kms:CancelKeyDeletion",
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ]
+      resources = ["*"]
+
+      principals {
+        type        = "AWS"
+        identifiers = var.kms_key_administrators_arns
+      }
+    }
+  }
+
 }
 
 // KMS Alias for S3 server-side encryption
