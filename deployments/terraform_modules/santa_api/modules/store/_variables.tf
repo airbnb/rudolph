@@ -23,3 +23,9 @@ variable "region" {
   type        = string
   description = "AWS Region"
 }
+
+variable "kms_key_administrators_arns" {
+  type = list(string)
+  description = "List of KMS Key Administrator ARNs to allow access to Rudolph KMS key operations"
+  default = []
+}

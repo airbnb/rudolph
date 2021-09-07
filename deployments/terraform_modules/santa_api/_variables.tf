@@ -119,3 +119,9 @@ variable "eventupload_output_lambda_name" {
   description = "A lambda function name. When provided, the eventupload endpoint will also send events to this lambda, in addition to Kinesis or Firehose."
   default     = ""
 }
+
+variable "kms_key_administrators_arns" {
+  type = list(string)
+  description = "List of KMS Key Administrator ARNs to allow access to Rudolph KMS key operations"
+  default = []
+}

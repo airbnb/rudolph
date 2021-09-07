@@ -98,3 +98,9 @@ variable "enable_s3_logging" {
   type = bool
   default = true
 }
+
+variable "kms_key_administrators_arns" {
+  type = list(string)
+  description = "List of KMS Key Administrator ARNs to allow access to Rudolph KMS key operations"
+  default = []
+}
