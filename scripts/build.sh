@@ -30,8 +30,9 @@ echo "  compiling authorizer..."
 GOOS=linux GOARCH=amd64 go build -o $LINUX_BUILD_DIR/authorizer $APPS_DIR/authorizer
 
 echo "  compiling cli..."
-GOOS=darwin go build -o $MACOS_BUILD_DIR/cli $APPS_DIR/cli
-
+GOOS=darwin GOARCH=amd64 go build -o $MACOS_BUILD_DIR/cli_amd64 $APPS_DIR/cli
+GOOS=darwin GOARCH=arm64 go build -o $MACOS_BUILD_DIR/cli_arm64 $APPS_DIR/cli
+lipo -create -output $MACOS_BUILD_DIR/cli $MACOS_BUILD_DIR/cli_amd64 $MACOS_BUILD_DIR/cli_arm64
 ln -sf $MACOS_BUILD_DIR/cli $DIR/$CLI_NAME
 
 echo "*** packaging... ***"
