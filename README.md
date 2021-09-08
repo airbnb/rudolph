@@ -5,7 +5,11 @@ Rudolph is built in Amazon Web Services, and utilizes exclusively serverless com
 
 ## Who is Rudolph For?
 Rudolph is built for teams interested in deploying [Santa](https://github.com/google/santa) to implement Binary Authorization
-on MacOS environments. In particular, it is designed to support Santa in **Lockdown Mode**.
+on MacOS environments. In particular, it is designed around supporting:
+
+* Santa in `LOCKDOWN` Mode
+* Realtime unblocking
+* Machine-specific configurations
 
 Addtionally, Rudolph uses Amazon Web Services and is ideal for teams that are too small to stand up or maintain more
 sophisticated environments.
@@ -15,6 +19,8 @@ sophisticated environments.
 * Proven scalability & cost-efficiency
 * Scales up and down automatically
 * High performance; Rudolph is _designed_ to support 60-second sync intervals on Santa sensors, for real-time unblocking
+
+More information can be found in our [primer on Lockdown](/docs/lockdown.md).
 
 
 # Deployment
