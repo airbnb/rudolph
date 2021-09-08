@@ -22,4 +22,6 @@ module "santa_api" {
   package_version = var.package_version
 
   enable_s3_logging = var.enable_s3_logging
+
+  kms_key_administrators_arns = var.kms_key_administrators_arns
 }
