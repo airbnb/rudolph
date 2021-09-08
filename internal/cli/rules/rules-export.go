@@ -1,9 +1,6 @@
 package rules
 
 import (
-	"fmt"
-	"sync"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
@@ -40,7 +37,6 @@ func runExport(
 	client dynamodb.QueryAPI,
 	filename string,
 ) (err error) {
-
 	csvRules := make(chan []string)
 
 	header := []string{
@@ -51,15 +47,10 @@ func runExport(
 		"description",
 	}
 
-	wg := new(sync.WaitGroup)
-
-	go func() {
-		err := csv.WriteCsvFile(filename, header, csvRules, wg)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println("Done")
-	}()
+	wg, err := csv.WriteCsvFile(filename, header, csvRules)
+	if err != nil {
+		panic(err)
+	}
 
 	var key *dynamodb.PrimaryKey
 	for {
@@ -83,7 +74,6 @@ func runExport(
 				rule.Description,
 			}
 
-			wg.Add(1)
 			csvRules <- record
 		}
 
@@ -92,6 +82,7 @@ func runExport(
 		}
 		key = nextkey
 	}
+	close(csvRules)
 
 	wg.Wait()
 

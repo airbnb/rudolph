@@ -64,16 +64,15 @@ func WriteCsvFile(
 	filename string,
 	headers []string,
 	input <-chan []string,
-	wg *sync.WaitGroup,
-) (err error) {
+) (wg *sync.WaitGroup, err error) {
 	f, err := os.Create(filename)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to open file for writing: %s", filename)
 		return
 	}
-	defer f.Close()
 	err = f.Truncate(0)
 	if err != nil {
+		f.Close()
 		err = errors.Wrap(err, "file is not writable")
 		return
 	}
@@ -86,16 +85,21 @@ func WriteCsvFile(
 		return
 	}
 
-	for {
-		record := <-input
+	wg = new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		defer f.Close()
+		defer csvWriter.Flush()
 
-		err = csvWriter.Write(record)
-		if err != nil {
-			err = errors.Wrap(err, "could not write csv line")
-			return
+		for record := range input {
+			err = csvWriter.Write(record)
+			if err != nil {
+				err = errors.Wrap(err, "could not write csv line")
+				return
+			}
 		}
+	}()
 
-		csvWriter.Flush()
-		wg.Done()
-	}
+	return
 }
