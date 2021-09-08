@@ -23,9 +23,6 @@ A sample output is provided below:
 ![Sample santactl fileinfo screenshot](./images/santa-fileinfo-sample-output-1.png)
 
 
-## Rules Database
-The rules database is a db file, located at /var/db/santa/rules.db. It contains a database of all rules.
-
 
 ## Importing or Exporting Rules
 Rudolph comes with a handy CLI tool. One of the useful commands is to import/export rules to/from a csv file.
@@ -48,3 +45,5 @@ export ENV=YOURENV
 ./rudolph rules import -f /path/to/rules.csv
 ```
 
+### Sample or Community Rules
+We've provided a directory with ... _some_ sample rules [examples/sample-rules.csv](/examples/sample-rules.csv), but each team is largely going to have to figure this stuff out on their own.
