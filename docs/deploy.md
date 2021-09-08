@@ -29,7 +29,7 @@ First, you will need to set up a new environment.
 ### Pick an ENV
 Pick a new environment name for your deployment.
 
-An environment is a unique instance of Rudolph is associated with a filesystem directory under [deployments/environments](deployments/environments/).
+An environment is a unique instance of Rudolph is associated with a filesystem directory under [deployments/environments](/deployments/environments/).
 
 ### EXPORT your ENV
 When working with a specific deployment environment, always make sure your `ENV` environment variable is set
@@ -59,7 +59,7 @@ You will end up creating:
 * (Optional) A `_outputs.tf` file
 
 You will also need to edit some of these files. A good resource to understanding these configuration files
-is the example ENV's [`README.md`](deployments/environments/example/README.md).
+is the example ENV's [`README.md`](/deployments/environments/example/README.md).
 
 
 ### Install Dependencies

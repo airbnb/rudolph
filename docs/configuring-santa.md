@@ -7,15 +7,15 @@ Provided here are some accelerated instructions.
 For unattended installs of Santa you'll want to approve Santa's system extension and full disk access. For convenience
 we've provided some sample configuration profiles here to get you started:
 
-* [configs/santa-sysext.mobileconfig](configs/santa-sysext.mobileconfig)
-* [configs/santa-tcc.mobileconfig](configs/santa-tcc.mobileconfig)
+* [configs/santa-sysext.mobileconfig](/configs/santa-sysext.mobileconfig)
+* [configs/santa-tcc.mobileconfig](/configs/santa-tcc.mobileconfig)
 
 Make sure to doctor them up a bit prior to a real production deploy.
 
 
 ## Configuration Profile
 The Santa agent is configured via MacOS Profiles. Take a look at the example `.mobileconfig` file we've provided
-[configs/santa-configuration.mobileconfig](configs/santa-configuration.mobileconfig). Below we'll go over some of
+[configs/santa-configuration.mobileconfig](/configs/santa-configuration.mobileconfig). Below we'll go over some of
 the **_more important_** values to pay attention to.
 
 ### `SyncBaseURL`
@@ -35,7 +35,7 @@ later remotely changed by Rudolph once everything is set up, but an initial defa
 
 ## Plist File
 Deploy a `.plist` file to the `MachineIDPlist` location, using your MDM or otherwise. We've included an example file,
-[configs/com.google.santa.machine-mapping.plist](configs/com.google.santa.machine-mapping.plist).
+[configs/com.google.santa.machine-mapping.plist](/configs/com.google.santa.machine-mapping.plist).
 
 We **_highly recommend_** using **UPPER-CASE-HEXADECIMAL-UUID-WITH-SPACES** (e.g. `AAAABBBB-CCCC-DDDD-EEEE-123456780000`)
 for the `MachineID`.
