@@ -26,12 +26,12 @@ You will never need to edit this main file after creating the symlink. Leave it 
 Create a `versions.tf` in the environment directory with the appropriate versions. We recommend the following:
 ```
 terraform {
-  required_version = ">= 0.14"
+  required_version = ">= 0.14.11"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.3.0"
+      version = "~> 3.38.0"
     }
   }
 }

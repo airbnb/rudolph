@@ -54,7 +54,7 @@ resource "aws_dynamodb_table" "store" {
     enabled = true
   }
 
-  tags = {
-    Name = "Rudolph"
-  }
+  # tags = {
+  #   Name = "Rudolph"
+  # }
 }

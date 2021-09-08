@@ -35,9 +35,9 @@ resource "aws_lambda_function" "api_handler" {
     }
   }
 
-  tags = {
-    Name = "Rudolph"
-  }
+  # tags = {
+  #   Name = "Rudolph"
+  # }
 }
 
 resource "aws_lambda_alias" "api_handler" {

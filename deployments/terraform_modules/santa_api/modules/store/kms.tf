@@ -4,9 +4,9 @@ resource "aws_kms_key" "store_sse_key" {
   description         = "Santa Rules Tables Server-Side Encryption"
   policy              = data.aws_iam_policy_document.store_sse_permissions.json
 
-  tags = {
-    Name = "Rudolph"
-  }
+  # tags = {
+  #   Name = "Rudolph"
+  # }
 }
 
 data "aws_iam_policy_document" "store_sse_permissions" {
