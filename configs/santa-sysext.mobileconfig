@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>AllowUserOverrides</key>
+			<true/>
+			<key>AllowedTeamIdentifiers</key>
+			<array>
+			  <string>EQHXZ8M8AV</string>
+			</array>
+			<key>PayloadDescription</key>
+			<string>Sample System Extension Policy Setting</string>
+			<key>PayloadDisplayName</key>
+			<string>Sample System Extension Policy Setting</string>
+			<key>PayloadEnabled</key>
+			<true/>
+			<key>PayloadIdentifier</key>
+			<string>com.apple.system-extension-policy.11112222-3333-4444-5555-666677778888</string>
+			<key>PayloadOrganization</key>
+			<string>Acme Inc.</string>
+			<key>PayloadType</key>
+			<string>com.apple.system-extension-policy</string>
+			<key>PayloadUUID</key>
+			<string>11112222-3333-4444-5555-666677778888</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Sample System Extension Policy Setting</string>
+	<key>PayloadDisplayName</key>
+	<string>Sample System Extension Policy Setting</string>
+	<key>PayloadEnabled</key>
+	<true/>
+	<key>PayloadIdentifier</key>
+	<string>com.acme.profiles.sysextpolicy</string>
+	<key>PayloadOrganization</key>
+	<string>Acme Inc.</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadScope</key>
+	<string>System</string>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>44445555-4444-5555-4444-444455554444</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

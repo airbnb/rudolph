@@ -76,6 +76,17 @@ You can deploy your entire application now. Luckily, this step is super easy! Do
 make deploy
 ```
 
+Upon deploying successfully, you will see the `sync_base_url` output:
+
+> Apply complete! Resources: 1 added, 14 changed, 1 destroyed.
+>
+> Outputs:
+>
+> sync_base_url = "https://production-rudolph.acme.inc/"
+
+**_Remember this value_**, you will need it later when configuring Santa sensors.
+
+
 ### Test it Out
 Make an HTTP POST request to your new deployment. The request should hit a URL that looks something like:
 

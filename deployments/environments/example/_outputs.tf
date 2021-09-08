@@ -5,10 +5,6 @@
 #   include it to print out your API's hostname at the end of each terraform apply
 #   for convenience.
 #
-output "domain_url" {
-  value = module.santa_api.api_domain_name
-}
-
-output "raw_url" {
-  value = module.santa_api.raw_url
+output "sync_base_url" {
+  value = "https://${module.santa_api.api_domain_name}/"
 }

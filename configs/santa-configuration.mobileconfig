@@ -22,7 +22,7 @@
 								<false/>
 								<key>SyncBaseURL</key>
 								<string>https://rudolph-server.acme.corp/</string>
-                				<key>MoreInfoURL</key>
+                <key>MoreInfoURL</key>
 								<string>https://rudolph-controller.acme.corp/moreinfo</string>
 								<key>EventDetailText</key>
 								<string>Next Steps...</string>

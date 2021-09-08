@@ -1,0 +1,7 @@
+sha256,type,policy,custom_msg,description
+d84db96af8c2e60ac4c851a21ec460f6f84e0235beb17d24a78712b9b021ed57,CERTIFICATE,ALLOWLIST,,"Software Signing by Apple Inc."
+d292f56f78effeb715382f3578b3716309da04e31589b23b68c3750edd526660,CERTIFICATE,ALLOWLIST,,"Developer ID Application: Zoom Video Communications, Inc. (BJ4HAAB9B3)"
+96f18e09d65445985c7df5df74ef152a0bc42e8934175a626180d9700c343e7b,CERTIFICATE,ALLOWLIST,,"Developer ID Application: Mozilla Corporation (43AQ936H96)"
+61977d6006459c4cefe9b988a453589946224957bfc07b262cd7ca1b7a61e04e,CERTIFICATE,ALLOWLIST,,"Apple Mac OS Application Signing"
+345a8e098bd04794aaeefda8c9ef56a0bf3d3706d67d35bc0e23f11bb3bffce5,CERTIFICATE,ALLOWLIST,,"Developer ID Application: Google, Inc. (EQHXZ8M8AV)"
+2401d9aee4e3601e12529f8e48e889533630f1ceb8adb49c976fe5c93c9df5e7,CERTIFICATE,ALLOWLIST,,"Developer ID Application: Slack Technologies, Inc. (BQR82RBBHL), by Slack Technologies, Inc. (BQR82RBBHL)"
