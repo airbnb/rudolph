@@ -2,6 +2,7 @@ package rules
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 
 	"github.com/pkg/errors"
@@ -64,7 +65,8 @@ type fileRule struct {
 
 func runJsonExport(client dynamodb.QueryAPI, filename string) (err error) {
 	var jsonRules []fileRule
-	err = getRules(client, func(rule globalrules.GlobalRuleRow) (err error) {
+	fmt.Println("Querying rules from DynamoDB...")
+	total, err := getRules(client, func(rule globalrules.GlobalRuleRow) (err error) {
 		jsonRules = append(jsonRules, fileRule{
 			SHA256:        rule.SHA256,
 			RuleType:      rule.RuleType,
@@ -86,6 +88,8 @@ func runJsonExport(client dynamodb.QueryAPI, filename string) (err error) {
 	if err != nil {
 		return
 	}
+
+	fmt.Printf("rules discovered: %d, rules written: %d\n", total, len(jsonRules))
 
 	return
 }
@@ -109,7 +113,9 @@ func runCsvExport(
 		panic(err)
 	}
 
-	err = getRules(client, func(rule globalrules.GlobalRuleRow) (err error) {
+	fmt.Println("Querying rules from DynamoDB...")
+	var totalWritten int64
+	total, err := getRules(client, func(rule globalrules.GlobalRuleRow) (err error) {
 		ruleType, err := rule.RuleType.MarshalText()
 		if err != nil {
 			return
@@ -129,6 +135,7 @@ func runCsvExport(
 			return
 		}
 
+		totalWritten += 1
 		csvRules <- record
 		return
 	})
@@ -139,10 +146,12 @@ func runCsvExport(
 	close(csvRules)
 	wg.Wait()
 
+	fmt.Printf("rules discovered: %d, rules written: %d\n", total, totalWritten)
+
 	return
 }
 
-func getRules(client dynamodb.QueryAPI, callback func(globalrules.GlobalRuleRow) error) (err error) {
+func getRules(client dynamodb.QueryAPI, callback func(globalrules.GlobalRuleRow) error) (total int64, err error) {
 	var key *dynamodb.PrimaryKey
 	for {
 		rules, nextkey, inerr := globalrules.GetPaginatedGlobalRules(client, 50, key)
@@ -155,6 +164,7 @@ func getRules(client dynamodb.QueryAPI, callback func(globalrules.GlobalRuleRow)
 		}
 
 		for _, rule := range *rules {
+			total += 1
 			err = callback(rule)
 			if err != nil {
 				return

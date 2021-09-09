@@ -103,15 +103,33 @@ func runJsonImport(
 	var total uint64
 
 	// Start the workers
+	rulesBuffer := make(chan fileRule)
 	var wg sync.WaitGroup
 	for w := 0; w < numWorkers; w++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done() // ensure Done is called after this worker is complete
-			ddbWriter(client, timeProvider, data, &total)
+			ddbWriter(
+				client,
+				timeProvider,
+				rulesBuffer,
+				&total,
+			)
 		}()
 	}
 
+	// Shovel all the json-parsed rules into the worker queue
+	for _, rule := range rules {
+		rulesBuffer <- rule
+	}
+	close(rulesBuffer)
+
+	// Chill
+	wg.Wait()
+
+	fmt.Println("processed lines:", total)
+
+	return
 }
 
 func runCsvImport(
@@ -127,46 +145,74 @@ func runCsvImport(
 		return err
 	}
 
+	// Channel for csv parsing and workers to communicate over
+	rules := make(chan fileRule)
+
 	// Track a total number of lines processed
 	// This gets passed to workers and atomic.Add is
 	// used to increment in a thread-safe way
 	var total uint64
 
 	// Start the workers
+	// Fanning out workers allows us to make multiple HTTP requests concurrently which can
+	// improve performance assuming we aren't network I/O bottlenecked or something.
 	var wg sync.WaitGroup
 	for w := 0; w < numWorkers; w++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done() // ensure Done is called after this worker is complete
-
-			sha256, ok := line["sha256"]
-			if !ok {
-				panic("no sha256")
-			}
-			ruleTypeStr, ok := line["type"]
-			if !ok {
-				panic("no type")
-			}
-			policyStr, ok := line["policy"]
-			if !ok {
-				panic("no policy")
-			}
-			description, ok := line["description"]
-			if !ok {
-				description = ""
-			}
-
 			ddbWriter(
 				client,
 				timeProvider,
-				fileRule{
-					SHA256:   sha256,
-					RuleType: ruleTypeStr,
-				},
+				rules,
 				&total,
 			)
 		}()
 	}
+
+	// Start taking lines from the csv and shoveling them into the workers
+	for line := range data {
+		sha256, ok := line["sha256"]
+		if !ok {
+			panic("no sha256")
+		}
+		ruleTypeStr, ok := line["type"]
+		if !ok {
+			panic("no type")
+		}
+		policyStr, ok := line["policy"]
+		if !ok {
+			panic("no policy")
+		}
+		description, ok := line["description"]
+		if !ok {
+			description = ""
+		}
+		customMsg, ok := line["custom_msg"]
+		if !ok {
+			customMsg = ""
+		}
+
+		var ruleType types.RuleType
+		err := ruleType.UnmarshalText([]byte(ruleTypeStr))
+		if err != nil {
+			panic("invalid ruletype")
+		}
+		var policy types.Policy
+		err = policy.UnmarshalText([]byte(policyStr))
+		if err != nil {
+			panic("invalid policy")
+		}
+
+		rules <- fileRule{
+			SHA256:        sha256,
+			RuleType:      ruleType,
+			Policy:        policy,
+			Description:   description,
+			CustomMessage: customMsg,
+		}
+	}
+	close(rules)
 
 	// chill
 	wg.Wait()
@@ -179,32 +225,21 @@ func runCsvImport(
 func ddbWriter(
 	client dynamodb.DynamoDBClient,
 	timeProvider clock.TimeProvider,
-	// lines chan map[string]string,
 	rules chan fileRule,
 	total *uint64,
 ) {
 	for rule := range rules {
+		var err error
 		atomic.AddUint64(total, 1)
 
-		var ruleType types.RuleType
-		err := ruleType.UnmarshalText([]byte(rule.RuleType))
-		if err != nil {
-			panic("invalid ruletype")
-		}
-		var policy types.Policy
-		err = policy.UnmarshalText([]byte(rule.Policy))
-		if err != nil {
-			panic("invalid policy")
-		}
-
 		suffix := ""
-		if ruleType == types.Certificate {
+		if rule.RuleType == types.Certificate {
 			suffix = " (Cert)"
 		}
 
-		if policy == types.RulePolicyRemove {
+		if rule.Policy == types.RulePolicyRemove {
 			fmt.Printf("  Removing rule: [%s]\n", rule.SHA256)
-			sortkey := rudolphrules.RuleSortKeyFromTypeSHA(rule.SHA256, ruleType)
+			sortkey := rudolphrules.RuleSortKeyFromTypeSHA(rule.SHA256, rule.RuleType)
 			err = globalrules.RemoveGlobalRule(
 				timeProvider,
 				client,
@@ -214,13 +249,13 @@ func ddbWriter(
 			)
 
 		} else {
-			fmt.Printf("  Writing rule: [%s] %s%s\n", rule.Policy, rule.SHA256, suffix)
+			fmt.Printf("  Writing rule: [%+v] %s%s\n", rule.Policy, rule.SHA256, suffix)
 			err = globalrules.AddNewGlobalRule(
 				timeProvider,
 				client,
 				rule.SHA256,
-				ruleType,
-				policy,
+				rule.RuleType,
+				rule.Policy,
 				rule.Description,
 			)
 		}

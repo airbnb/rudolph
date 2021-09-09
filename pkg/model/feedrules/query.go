@@ -65,6 +65,6 @@ func GetPaginatedFeedRules(client dynamodb.QueryAPI, limit int, exclusiveStartKe
 		err = errors.Wrap(err, "failed to unmarshal result from DynamoDB")
 		return
 	}
-	log.Printf("    got %d items from query.", len(*items))
+	// log.Printf("    got %d items from query.", len(*items))
 	return
 }

@@ -28,20 +28,12 @@ func GetPrimaryKeysByMachineIDWhereMarkedForDeletion(client dynamodb.QueryAPI, m
 		ProjectionExpression: aws.String("PK, SK"),
 	}
 
-	// log.Printf("DDB Query Input:\n%+v", input)
-
 	output, err := client.Query(&input)
-
-	// log.Printf("Error:\n%+v", err)
-	// log.Printf("DDB Query Output:\n%+v", output)
-	// log.Printf("Discovered %d items", len(output.Items))
 
 	if err != nil {
 		return
 	}
 	err = attributevalue.UnmarshalListOfMaps(output.Items, &keys)
-
-	// log.Printf("Keys:\n%+v", *keys)
 
 	return
 }
@@ -61,8 +53,6 @@ func GetMachineRules(client dynamodb.QueryAPI, machineID string) (items *[]Machi
 		KeyConditionExpression:    keyConditionExpression,
 	}
 
-	// log.Printf("Executing DynamoDB Query:\n%+v", input)
-
 	result, err := client.Query(input)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to read rules from DynamoDB for partitionKey %q", partitionKey)
@@ -74,6 +64,5 @@ func GetMachineRules(client dynamodb.QueryAPI, machineID string) (items *[]Machi
 		err = errors.Wrap(err, "failed to unmarshal result from DynamoDB")
 		return
 	}
-	// log.Printf("    got %d items from query.", len(*items))
 	return
 }
