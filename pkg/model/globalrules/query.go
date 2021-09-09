@@ -1,8 +1,6 @@
 package globalrules
 
 import (
-	"log"
-
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -59,7 +57,6 @@ func GetPaginatedGlobalRules(client dynamodb.QueryAPI, limit int, exclusiveStart
 			err = errors.Wrap(err, "failed to unmarshall LastEvaluatedKey")
 			return
 		}
-		log.Printf("    lastEvaluatedKey: %+v", lastEvaluatedKey)
 	}
 
 	err = attributevalue.UnmarshalListOfMaps(result.Items, &items)
@@ -67,6 +64,5 @@ func GetPaginatedGlobalRules(client dynamodb.QueryAPI, limit int, exclusiveStart
 		err = errors.Wrap(err, "failed to unmarshal result from DynamoDB")
 		return
 	}
-	log.Printf("    got %d items from query.", len(*items))
 	return
 }
