@@ -229,7 +229,7 @@ func (c ConcreteMachineConfigurationUpdater) updateConfig(machineID string, conf
 	}
 
 	if configRequest.BlockedPathRegex != nil && strings.Compare(*configRequest.BlockedPathRegex, currentMachineConfig.BlockedPathRegex) != 0 {
-		newMachineConfig.AllowedPathRegex = *configRequest.BlockedPathRegex
+		newMachineConfig.BlockedPathRegex = *configRequest.BlockedPathRegex
 		changed = true
 	}
 
