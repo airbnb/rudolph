@@ -18,7 +18,7 @@ You will need Terraform v0.14+ installed. We recommend using [tfenv](https://git
 ### Registered Domain
 You will need a registered DNS domain name for Rudolph's API server.
 
-Purchasing a domain is very easy, simply use use AWS's Route 53 service to register a new domain. The exact URL
+Purchasing a domain is very easy, simply use AWS's Route 53 service to register a new domain. The exact URL
 is rarely seen by end users of Santa-Rudolph, so we advise picking any random cheap one to start things up quickly.
 
 ---
