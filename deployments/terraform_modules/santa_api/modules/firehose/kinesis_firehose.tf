@@ -5,9 +5,9 @@ locals {
 resource "aws_cloudwatch_log_group" "eventsupload_firehose" {
   name              = "/aws/kinesisfirehose/${local.firehose_name}"
 
-  tags = {
-    Name = "Rudolph"
-  }
+  # tags = {
+  #   Name = "Rudolph"
+  # }
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "eventsupload_firehose" {
