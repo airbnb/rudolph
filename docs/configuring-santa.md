@@ -62,7 +62,7 @@ Then you should be good to go.
 
 
 ## Other Miscellaneous
-Santa dumps tons of logs into `/var/db/santa.log`. These logs are extremely useful but this file can fill up very quickly.
+Santa dumps tons of logs into `/var/db/santa/santa.log`. These logs are extremely useful but this file can fill up very quickly.
 
 We recommend a newsyslog configuration: `/private/etc/newsyslog.d/com.google.santa.newsyslog.conf`
 ```
