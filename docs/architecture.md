@@ -28,7 +28,7 @@ return response structures. These structures are translated into HTTP responses 
 ## DynamoDB
 All rules, machine configurations, and uploaded sensor data are housed in DynamoDB.
 
-To modify sensor configurations or to edit rules, you would use the Santa golang code to make edits to this DynamoDB.
+To modify sensor configurations or to edit rules, you would [use the Rudolph cli tool](https://github.com/airbnb/rudolph/blob/master/docs/rules.md#importing-or-exporting-rules) to make edits to this DynamoDB.
 You **_would not_** go through Rudolph's public API, as that API does not have any endpoints that would implement this
 use case.
 
