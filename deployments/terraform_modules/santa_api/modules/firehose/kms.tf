@@ -25,19 +25,6 @@ resource "aws_kms_key" "rudolph_eventsupload_kms_key" {
 
 data "aws_iam_policy_document" "rudolph_eventsupload_kms_key_policy" {
   statement {
-    sid    = "Enable IAM User Permissions"
-    effect = "Allow"
-
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.aws_account_id}:root"]
-    }
-
-    actions   = ["kms:*"]
-    resources = ["*"]
-  }
-
-  statement {
     sid    = "Allow principals in the account to use the key"
     effect = "Allow"
 
@@ -51,12 +38,6 @@ data "aws_iam_policy_document" "rudolph_eventsupload_kms_key_policy" {
       variable = "kms:CallerAccount"
       values   = [var.aws_account_id]
     }
-
-    # condition {
-    #   test     = "StringLike"
-    #   variable = "kms:ViaService"
-    #   values   = ["firehose.*.amazonaws.com"]
-    # }
 
     actions = [
       "kms:CreateGrant",

@@ -3,26 +3,21 @@ resource "aws_kms_key" "store_sse_key" {
   enable_key_rotation = true
   description         = "Santa Rules Tables Server-Side Encryption"
   policy              = data.aws_iam_policy_document.store_sse_permissions.json
-
-  # tags = {
-  #   Name = "Rudolph"
-  # }
 }
 
 data "aws_iam_policy_document" "store_sse_permissions" {
   statement {
-    sid    = "Enable IAM User Permissions"
-    effect = "Allow"
-
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.aws_account_id}:root"]
-    }
-
+    sid       = "Enable IAM User Permissions"
+    effect    = "Allow"
     actions   = ["kms:*"]
     resources = ["*"]
+    principals {
+      type        = "AWS"
+      identifiers = [
+        "arn:aws:iam::${var.aws_account_id}:root",
+      ]
+    }
   }
-
   statement {
     sid    = "Allow principals in the account to use the key"
     effect = "Allow"
@@ -31,17 +26,15 @@ data "aws_iam_policy_document" "store_sse_permissions" {
       type        = "AWS"
       identifiers = ["*"]
     }
-
-    # condition {
-    #   test     = "StringEquals"
-    #   variable = "kms:CallerAccount"
-    #   values   = [var.aws_account_id]
-    # }
-    #
     condition {
-      test     = "StringLike"
+      test     = "StringEquals"
       variable = "kms:ViaService"
-      values   = ["dynamodb.*.amazonaws.com"]
+      values   = ["dynamodb.${var.region}.amazonaws.com"]
+    }
+    condition {
+      test = "StringEquals"
+      variable = "kms:CallerAccount"
+      values = ["${var.aws_account_id}"]
     }
 
     actions = [
@@ -72,40 +65,6 @@ data "aws_iam_policy_document" "store_sse_permissions" {
     ]
 
     resources = ["*"]
-  }
-
-  statement {
-    sid       = "Allow access for root user"
-    effect    = "Allow"
-    actions   = [
-      "kms:Create*",
-      "kms:Describe*",
-      "kms:Enable*",
-      "kms:List*",
-      "kms:Put*",
-      "kms:Update*",
-      "kms:Revoke*",
-      "kms:Disable*",
-      "kms:Get*",
-      "kms:Delete*",
-      "kms:TagResource",
-      "kms:UntagResource",
-      "kms:ScheduleKeyDeletion",
-      "kms:CancelKeyDeletion",
-      "kms:Encrypt",
-      "kms:Decrypt",
-      "kms:ReEncrypt*",
-      "kms:GenerateDataKey*",
-      "kms:DescribeKey"
-    ]
-    resources = ["*"]
-
-    principals {
-      type        = "AWS"
-      identifiers = [
-        "arn:aws:iam::${var.aws_account_id}:root",
-      ]
-    }
   }
 
   dynamic "statement" {

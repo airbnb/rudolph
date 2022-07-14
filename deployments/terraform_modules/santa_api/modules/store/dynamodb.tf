@@ -53,8 +53,4 @@ resource "aws_dynamodb_table" "store" {
   point_in_time_recovery {
     enabled = true
   }
-
-  # tags = {
-  #   Name = "Rudolph"
-  # }
 }
