@@ -125,3 +125,9 @@ variable "kms_key_administrators_arns" {
   description = "List of KMS Key Administrator ARNs to allow access to Rudolph KMS key operations"
   default = []
 }
+
+variable "enable_mutual_tls_authentication" {
+  type        = bool
+  description = "Whether or not to enable mutual TLS authentication at the API Gateway layer"
+  default     = false
+}

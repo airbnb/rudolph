@@ -60,6 +60,14 @@ resource "aws_api_gateway_domain_name" "api_custom_domain" {
   regional_certificate_arn = aws_acm_certificate_validation.api_certificate_validation.certificate_arn
   security_policy          = "TLS_1_2"
 
+
+  dynamic "mutual_tls_authentication" {
+    for_each = var.enable_mutual_tls_authentication ? [1] : []
+    content {
+      truststore_uri = "${local.lambda_source_bucket}/truststore.pem"
+    }
+  }
+
   endpoint_configuration {
     types = ["REGIONAL"]
   }
