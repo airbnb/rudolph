@@ -23,5 +23,7 @@ module "santa_api" {
 
   enable_s3_logging = var.enable_s3_logging
 
+  enable_mutual_tls_authentication = var.enable_mutual_tls_authentication
+
   kms_key_administrators_arns = var.kms_key_administrators_arns
 }

@@ -107,5 +107,6 @@ variable "kms_key_administrators_arns" {
 
 variable "enable_mutual_tls_authentication" {
   type = bool
+  description = "Whether or not to enable mutual TLS authentication at the API Gateway layer"
   default = false
 }
