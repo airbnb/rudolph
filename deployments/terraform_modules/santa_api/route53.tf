@@ -64,7 +64,7 @@ resource "aws_api_gateway_domain_name" "api_custom_domain" {
   dynamic "mutual_tls_authentication" {
     for_each = var.enable_mutual_tls_authentication ? [1] : []
     content {
-      truststore_uri = "${local.lambda_source_bucket}/truststore.pem"
+      truststore_uri = "s3://${local.lambda_source_bucket}/truststore.pem"
     }
   }
 
