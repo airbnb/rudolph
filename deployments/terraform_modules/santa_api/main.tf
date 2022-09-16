@@ -15,6 +15,8 @@ resource "aws_api_gateway_rest_api" "api_gateway" {
   # Use the authorizer's UsageIdentifierKey to uniquely identify an endpoint.
   api_key_source = "AUTHORIZER"
 
+  disable_execute_api_endpoint = var.disable_execute_api_endpoint
+
   # tags = {
   #   Name = "Rudolph"
   # }
