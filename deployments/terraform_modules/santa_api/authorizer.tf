@@ -17,5 +17,6 @@ module "rudolph_api_authorizer" {
     REGION      = var.region
     GATEWAY_ID  = aws_api_gateway_rest_api.api_gateway.id
     ACCOUNT_ID  = var.aws_account_id
+    STAGE_NAME  = var.stage_name
   }
 }

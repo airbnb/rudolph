@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -17,6 +18,7 @@ type authorizerEnvironment struct {
 	Region    string
 	GatewayID string
 	AccountID string
+	StageName string
 }
 
 var (
@@ -28,24 +30,26 @@ func init() {
 		Region:    os.Getenv("REGION"),
 		GatewayID: os.Getenv("GATEWAY_ID"),
 		AccountID: os.Getenv("ACCOUNT_ID"),
+		StageName: os.Getenv("STAGE_NAME"),
 	}
+
 }
 
 // HandleAuthorizerRequest is the handler to be used by the authorizer function
-func HandleAuthorizerRequest(request events.APIGatewayProxyRequest) (*events.APIGatewayCustomAuthorizerResponse, error) {
-	log.Printf("lambda request - HandleAuthorizerRequest:\n%+v\n", request)
+func HandleAuthorizerRequest(request events.APIGatewayCustomAuthorizerRequestTypeRequest) (*events.APIGatewayCustomAuthorizerResponse, error) {
+	log.Println("Custom Lambda Authorizer - Method ARN: " + request.MethodArn)
 
-	if request.HTTPMethod == "GET" && request.Path == "/health" {
-		return allowResponse("HEALTH_CHECK"), nil
+	if request.HTTPMethod == http.MethodGet && request.Path == "/health" {
+		return allowResponse(request, "HEALTH_CHECK"), nil
 	}
 
-	if request.HTTPMethod != "POST" {
-		return denyResponse("Incorrect Method"), nil
+	if request.HTTPMethod != http.MethodPost {
+		return denyResponse(request, "Incorrect Method"), nil
 	}
 
 	machineID, ok := request.PathParameters["machine_id"]
 	if !ok {
-		return denyResponse("Incorrect Request URI"), nil
+		return denyResponse(request, "Incorrect Request URI"), nil
 	}
 
 	// TODO: FILL ME IN
@@ -80,10 +84,10 @@ func HandleAuthorizerRequest(request events.APIGatewayProxyRequest) (*events.API
 	// 	return denyResponse("Incorrect Format"), nil
 	// }
 
-	return allowResponse(machineID), nil
+	return allowResponse(request, machineID), nil
 }
 
-func denyResponse(denyReason string) *events.APIGatewayCustomAuthorizerResponse {
+func denyResponse(request events.APIGatewayCustomAuthorizerRequestTypeRequest, denyReason string) *events.APIGatewayCustomAuthorizerResponse {
 	context := make(map[string]interface{}, 1)
 	context["DenyReason"] = denyReason
 
@@ -104,27 +108,54 @@ func denyResponse(denyReason string) *events.APIGatewayCustomAuthorizerResponse 
 	}
 }
 
-func allowResponse(machineID string) *events.APIGatewayCustomAuthorizerResponse {
+func allowResponse(request events.APIGatewayCustomAuthorizerRequestTypeRequest, principalID string) *events.APIGatewayCustomAuthorizerResponse {
+	allowedResourceArns := []string{}
 	context := make(map[string]interface{}, 1)
-	context["MachineID"] = machineID
+	context["MachineID"] = principalID
 
-	// Creates a generic resource
-	//"arn:aws:execute-api:*:*:*/*/*/*"
-	//<RANDOM_KEY>/<STAGE>/<HTTP_METHOD>/<URLPATH>
-	resourceArn := fmt.Sprintf("arn:aws:execute-api:%s:%s:%s/*/*/*/*", authorizerEnv.Region, authorizerEnv.AccountID, authorizerEnv.GatewayID)
+	switch request.HTTPMethod {
+	case http.MethodGet:
+		allowedResourceArns = append(
+			allowedResourceArns,
+			generateArnResource("GET", "health"),
+		)
+	case http.MethodPost:
+		allowedResourceArns = append(
+			allowedResourceArns,
+			generateArnResource("POST", "preflight/*"),
+			generateArnResource("POST", "eventupload/*"),
+			generateArnResource("POST", "ruledownload/*"),
+			generateArnResource("POST", "postflight/*"),
+			generateArnResource("POST", "xsrf/*"),
+		)
+	}
+
 	return &events.APIGatewayCustomAuthorizerResponse{
-		PrincipalID: "ValidSantaEndpoint",
+		PrincipalID: principalID,
 		PolicyDocument: events.APIGatewayCustomAuthorizerPolicy{
 			Version: "2012-10-17",
 			Statement: []events.IAMPolicyStatement{
 				{
 					Action:   []string{"execute-api:Invoke"},
 					Effect:   "Allow",
-					Resource: []string{resourceArn},
+					Resource: allowedResourceArns,
 				},
 			},
 		},
 		Context:            context,
-		UsageIdentifierKey: machineID,
+		UsageIdentifierKey: principalID,
 	}
+}
+
+func generateArnResource(verb, resource string) string {
+	// Creates a generic resource
+	// arn:aws:execute-api:region:account-id:api-id/stage-name/HTTP-VERB/resource-path-specifier
+	return fmt.Sprintf("arn:aws:execute-api:%s:%s:%s/%s/%s/%s",
+		authorizerEnv.Region,
+		authorizerEnv.AccountID,
+		authorizerEnv.GatewayID,
+		authorizerEnv.StageName,
+		verb,
+		resource,
+	)
 }
