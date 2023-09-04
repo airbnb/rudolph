@@ -39,14 +39,14 @@ variable "stage_name" {
   description = "Name of stage to use for this deployment"
 }
 
-variable "lambda_zip" {
+variable "lambda_api_zip" {
   type        = string
   description = "Full path to zip with go binary for Lambda to be uploaded to S3"
 }
 
-variable "package_version" {
+variable "lambda_authorizer_zip" {
   type        = string
-  description = "Version of golang binary being used. This value comes from git tags and is used when the Lambda package is uploaded to S3"
+  description = "Full path to zip with go binary for Lambda to be uploaded to S3"
 }
 
 variable "use_existing_route53_zone" {

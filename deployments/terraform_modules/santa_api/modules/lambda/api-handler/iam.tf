@@ -7,10 +7,6 @@ resource "aws_iam_role" "api_handler_role" {
   name               = "${var.prefix}_rudolph_${var.endpoint}_role"
   assume_role_policy = data.aws_iam_policy_document.lambda_execution_policy.json
   path               = "/rudolph/"
-
-  # tags = {
-  #   Name = "Rudolph"
-  # }
 }
 
 data "aws_iam_policy_document" "lambda_execution_policy" {

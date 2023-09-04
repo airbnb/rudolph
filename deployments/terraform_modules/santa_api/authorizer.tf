@@ -9,9 +9,9 @@ module "rudolph_api_authorizer" {
   alias_name                = var.stage_name
   api_gateway_id            = aws_api_gateway_rest_api.api_gateway.id
   api_gateway_execution_arn = aws_api_gateway_rest_api.api_gateway.execution_arn
-  lambda_source_bucket      = aws_s3_bucket_object.santa_api_source.bucket
-  lambda_source_key         = aws_s3_bucket_object.santa_api_source.key
-  lambda_source_hash        = local.lambda_source_hash
+  lambda_source_bucket      = aws_s3_bucket_object.santa_api_authorizer_source.bucket
+  lambda_source_key         = aws_s3_bucket_object.santa_api_authorizer_source.key
+  lambda_source_hash        = local.lambda_authorizer_hash
 
   env_vars = {
     REGION      = var.region

@@ -1,9 +1,10 @@
 PKG = github.com/airbnb/rudolph
 VERSION := $(shell git describe --tags --always)
 DOCS_DIR ?= ./docs
-DEPLOYMENT_ZIP_PATH = $(PWD)/build/package/deployment.zip
+RUDOLPH_API_DEPLOYMENT_ZIP_PATH = $(PWD)/build/package/api_deployment.zip
+RUDOLPH_API_AUTHORIZER_DEPLOYMENT_ZIP_PATH = $(PWD)/build/package/api_authorizer_deployment.zip
 TERRAFORM_DEPLOYMENTS_DIR = $(PWD)/deployments/environments
-TF_DEFAULT_FLAGS = --var zip_file_path="$(DEPLOYMENT_ZIP_PATH)" --var package_version=$(VERSION)
+TF_DEFAULT_FLAGS = --var lambda_api_zip="$(RUDOLPH_API_DEPLOYMENT_ZIP_PATH)" --var lambda_authorizer_zip="$(RUDOLPH_API_AUTHORIZER_DEPLOYMENT_ZIP_PATH)"
 LDFLAGS=-ldflags="-X main.version=$(VERSION)"
 
 # Check to ensure the prefix is being passed in as an arg like `ENV=<YOUR_ENVIRONMENT>`

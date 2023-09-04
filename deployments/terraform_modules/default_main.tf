@@ -18,9 +18,9 @@ module "santa_api" {
   route53_zone_name   = var.route53_zone_name
   use_existing_route53_zone = var.use_existing_route53_zone
 
-  lambda_zip      = var.zip_file_path
-  package_version = var.package_version
-
+  lambda_api_zip  = var.lambda_api_zip
+  lambda_authorizer_zip = var.lambda_authorizer_zip
+  
   enable_s3_logging = var.enable_s3_logging
 
   kms_key_administrators_arns = var.kms_key_administrators_arns

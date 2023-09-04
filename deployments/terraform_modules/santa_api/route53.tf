@@ -4,10 +4,6 @@
 resource "aws_acm_certificate" "api_ssl_certificate" {
   domain_name       = local.api_domain_name
   validation_method = "DNS"
-
-  # tags = {
-  #   Name = "Rudolph"
-  # }
 }
 
 resource "aws_acm_certificate_validation" "api_certificate_validation" {

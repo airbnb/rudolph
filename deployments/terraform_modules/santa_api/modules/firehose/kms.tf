@@ -17,10 +17,6 @@ resource "aws_kms_key" "rudolph_eventsupload_kms_key" {
   enable_key_rotation = true
   description         = "Rudolph EventsUpload S3 Server-Side Encryption"
   policy              = data.aws_iam_policy_document.rudolph_eventsupload_kms_key_policy.json
-
-  tags = {
-    Name = "Rudolph"
-  }
 }
 
 data "aws_iam_policy_document" "rudolph_eventsupload_kms_key_policy" {
