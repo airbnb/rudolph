@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "store_sse_permissions" {
     condition {
       test = "StringEquals"
       variable = "kms:CallerAccount"
-      values = ["${var.aws_account_id}"]
+      values = [var.aws_account_id]
     }
 
     actions = [
