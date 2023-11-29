@@ -1,11 +1,11 @@
-variable "zip_file_path" {
+variable "lambda_api_zip" {
   type        = string
-  description = "Path to zip on disk to use for deployment of Lambda functions. This gets passed in from 'make deploy' command"
+  description = "Full path to zip with go binary for Lambda to be uploaded to S3"
 }
 
-variable "package_version" {
+variable "lambda_authorizer_zip" {
   type        = string
-  description = "Version of golang binary being used. This value comes from git tags and is used when the Lambda package is uploaded to S3. This gets passed in from 'make deploy' command"
+  description = "Full path to zip with go binary for Lambda to be uploaded to S3"
 }
 
 // These variables are provided by config.auto.tfvars.json

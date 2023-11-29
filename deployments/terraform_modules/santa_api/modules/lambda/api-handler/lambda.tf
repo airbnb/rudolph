@@ -3,7 +3,8 @@
 #
 
 locals {
-  handler = var.lambda_handler == "" ? var.endpoint : var.lambda_handler
+  handler = "bootstrap"
+  runtime = "provided.al2"
 }
 
 
@@ -11,8 +12,9 @@ resource "aws_lambda_function" "api_handler" {
   function_name = "${var.prefix}_rudolph_${var.endpoint}"
   role          = aws_iam_role.api_handler_role.arn
   handler       = local.handler
-  runtime       = "go1.x"
+  runtime       = local.runtime
   publish       = true
+  architectures = ["arm64"]
 
   s3_bucket        = var.lambda_source_bucket
   s3_key           = var.lambda_source_key
@@ -34,10 +36,6 @@ resource "aws_lambda_function" "api_handler" {
       variables = var.env_vars
     }
   }
-
-  # tags = {
-  #   Name = "Rudolph"
-  # }
 }
 
 resource "aws_lambda_alias" "api_handler" {

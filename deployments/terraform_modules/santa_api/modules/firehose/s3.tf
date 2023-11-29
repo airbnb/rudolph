@@ -70,8 +70,4 @@ resource "aws_s3_bucket" "rudolph_eventsupload_firehose" {
       }
     }
   }
-
-  tags = {
-    Name = "Rudolph"
-  }
 }

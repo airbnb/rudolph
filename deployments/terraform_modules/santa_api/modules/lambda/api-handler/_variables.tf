@@ -31,7 +31,7 @@ variable "endpoint" {
 variable "lambda_handler" {
   type        = string
   description = "Lambda function handler path. If left blank, this will default to a formatted handler based on the endpoint variable value"
-  default     = ""
+  default     = "bootstrap"
 }
 
 variable "alias_name" {

@@ -39,20 +39,12 @@ resource "aws_s3_bucket" "santa_api_source" {
       }
     }
   }
-
-  # tags = {
-  #   Name = "Rudolph"
-  # }
 }
 
 // KMS Key for S3 server-side encryption
 resource "aws_kms_key" "santa_api_source" {
   enable_key_rotation = true
   description         = "Rudolph Source S3 Server-Side Encryption"
-
-  # tags = {
-  #   Name = "Rudolph"
-  # }
 }
 
 // KMS Alias for S3 server-side encryption
