@@ -43,5 +43,7 @@ type PreflightRequest struct {
 	PrimaryUser          string           `json:"primary_user"`
 	CompilerRuleCount    int              `json:"compiler_rule_count"`
 	TransitiveRuleCount  int              `json:"transitive_rule_count"`
+	TeamIDRuleCount      int              `json:"team_id_rule_count"`
 	RequestCleanSync     bool             `json:"request_clean_sync"`
+	ModelIdentifier      string           `json:"model_identifier"`
 }

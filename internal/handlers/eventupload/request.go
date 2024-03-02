@@ -65,6 +65,8 @@ type EventUploadEvent struct {
 	QuarantineTimestamp          int            `json:"quarantine_timestamp"`
 	LoggedInUsers                []string       `json:"logged_in_users"`
 	SigningChain                 []SigningEntry `json:"signing_chain"`
+	SigningIDs                   string         `json:"signing_id"`
+	TeamID                       string         `json:"team_id"`
 	ParentProcessID              int            `json:"ppid"`
 	ExecutingUser                string         `json:"executing_user"`
 	FileName                     string         `json:"file_name"`
