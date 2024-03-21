@@ -5,7 +5,14 @@ import (
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 )
 
-func CreateNewSyncState(timeProvider clock.TimeProvider, machineID string, requestCleanSync bool, lastCleanSync string, batchSize int, feedSyncCursor string) SyncStateRow {
+func CreateNewSyncState(
+	timeProvider clock.TimeProvider,
+	machineID string,
+	requestCleanSync bool,
+	lastCleanSync string,
+	batchSize int,
+	feedSyncCursor string,
+) SyncStateRow {
 	return SyncStateRow{
 		PrimaryKey: dynamodb.PrimaryKey{
 			PartitionKey: syncStatePK(machineID),

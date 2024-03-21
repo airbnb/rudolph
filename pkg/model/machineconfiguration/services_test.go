@@ -33,7 +33,6 @@ var (
 		BatchSize:        10,
 		AllowedPathRegex: "/usr/bin/local, /opt/bin",
 		BlockedPathRegex: "/trash",
-		SyncType:         expectedGlobalSyncMode,
 	}
 
 	expectedGlobalConfig = MachineConfiguration{
@@ -41,7 +40,6 @@ var (
 		BatchSize:        20,
 		AllowedPathRegex: "/usr/bin/local, /opt/bin",
 		BlockedPathRegex: "/trash, /tmp",
-		SyncType:         expectedGlobalSyncMode,
 	}
 
 	expectedGlobalConfigDefault = GetUniversalDefaultConfig()
@@ -55,7 +53,6 @@ var (
 		BatchSize:        &machineConfigurationRequestBatchSize,
 		AllowedPathRegex: &machineConfigurationRequestAllowedPaths,
 		BlockedPathRegex: &machineConfigurationRequestBlockedPaths,
-		SyncType:         &expectedGlobalSyncMode,
 	}
 
 	globalConfigurationRequestBatchSize    int    = 21
@@ -74,7 +71,6 @@ var (
 		BatchSize:        20,
 		AllowedPathRegex: "/usr/bin/local, /opt/bin",
 		BlockedPathRegex: "/trash, /tmp",
-		SyncType:         types.SyncTypeNormal,
 	}
 
 	machineConfigPKey = dynamodb.PrimaryKey{
@@ -109,7 +105,6 @@ var (
 			CleanSync:              false,
 			FullSyncInterval:       DefaultFullSyncInterval,
 			UploadLogsURL:          "",
-			SyncType:               types.SyncTypeNormal,
 			DataType:               types.DataTypeGlobalConfig,
 		},
 	}

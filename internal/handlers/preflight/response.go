@@ -20,18 +20,24 @@ type PreflightResponse struct {
 	BatchSize                int              `json:"batch_size"`
 	EnableBundles            bool             `json:"enable_bundles"`
 	EnabledTransitiveRules   bool             `json:"enable_transitive_rules"`
-	CleanSync                bool             `json:"clean_sync,omitempty"`
 	FullSyncInterval         int              `json:"full_sync_interval,omitempty"`
 	UploadLogsURL            string           `json:"upload_logs_url,omitempty"`
 	BlockUsbMount            bool             `json:"block_usb_mount,omitempty"`
 	RemountUsbMode           string           `json:"remount_usb_mode,omitempty"`
-	SyncType                 string           `json:"sync_type,omitempty"`
+	SyncType                 types.SyncType   `json:"sync_type,omitempty"`
 	OverrideFileAccessAction string           `json:"override_file_access_action,omitempty"`
 }
 
 // ConstructPreflightResponse converts a MachineConfiguration pulled from the database into the corresponding
 // response to be return as an API response.
 func ConstructPreflightResponse(machineConfiguration machineconfiguration.MachineConfiguration, cleanSync bool) *PreflightResponse {
+	var syncType types.SyncType
+	switch cleanSync {
+	case true:
+		syncType = types.SyncTypeClean
+	default:
+		syncType = types.SyncTypeNormal
+	}
 	return &PreflightResponse{
 		ClientMode:             machineConfiguration.ClientMode,
 		BlockedPathRegex:       machineConfiguration.BlockedPathRegex,
@@ -41,10 +47,7 @@ func ConstructPreflightResponse(machineConfiguration machineconfiguration.Machin
 		EnabledTransitiveRules: machineConfiguration.EnabledTransitiveRules,
 		UploadLogsURL:          machineConfiguration.UploadLogsURL,
 		FullSyncInterval:       machineConfiguration.FullSyncInterval,
-		CleanSync:              cleanSync,
+		SyncType:               syncType,
 		// Notably, we do not grab the clean sync from the config
-		// FYI: Sending down a clean sync to the client instructs it to erase all rules, so be careful!
 	}
-
-	//return (*PreflightResponse)(&machineConfiguration)
 }

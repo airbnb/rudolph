@@ -1,6 +1,7 @@
 package preflight
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/airbnb/rudolph/pkg/clock"
@@ -138,25 +139,36 @@ func TestHandler_OK(t *testing.T) {
 	timeProvider := clock.FrozenTimeProvider{
 		Current: now,
 	}
+
+	preflightRequestBody := &PreflightRequest{
+		OSBuild:              "23E214",
+		OSVersion:            "14.4",
+		SantaVersion:         "2024.2",
+		Hostname:             "my-awesome-macbook-pro",
+		ClientMode:           types.Lockdown,
+		SerialNumber:         "C02123456789",
+		PrimaryUser:          "nobody",
+		CertificateRuleCount: 2364,
+		TeamIDRuleCount:      0,
+		SigningIDRuleCount:   12,
+		CDHashRuleCount:      34,
+		BinaryRuleCount:      43676,
+		RequestCleanSync:     false,
+	}
+
+	b, err := json.Marshal(preflightRequestBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	var request = events.APIGatewayProxyRequest{
 		HTTPMethod:     "POST",
 		Resource:       "/preflight/{machine_id}",
 		PathParameters: map[string]string{"machine_id": inputMachineID},
 		Headers:        map[string]string{"Content-Type": "application/json"},
-		Body: `{
-	"os_build":"20D5029f",
-	"santa_version":"2021.1",
-	"hostname":"my-awesome-macbook-pro.attlocal.net",
-	"transitive_rule_count":0,
-	"os_version":"11.2",
-	"certificate_rule_count":2,
-	"client_mode":"MONITOR",
-	"serial_num":"C02123456789",
-	"binary_rule_count":3,
-	"primary_user":"nobody",
-	"compiler_rule_count":0
-}`,
+		Body:           string(b),
 	}
+
 	mockedConfigurationFetcher := &MockDynamodb{}
 
 	config := machineconfiguration.MachineConfiguration{
@@ -164,7 +176,7 @@ func TestHandler_OK(t *testing.T) {
 		BatchSize:        37,
 		UploadLogsURL:    "/aaa",
 		EnableBundles:    true,
-		AllowedPathRegex: "",
+		AllowedPathRegex: "(^/Applications)",
 		CleanSync:        false,
 	}
 
@@ -181,13 +193,48 @@ func TestHandler_OK(t *testing.T) {
 		Item: nil,
 	}, nil)
 
-	// mockedStateTracking.On("PutItem", mock.MatchedBy(func(item interface{}) bool {
 	mockedStateTracking.On("PutItem", mock.MatchedBy(func(syncState syncstate.SyncStateRow) bool {
 		return syncState.MachineID == inputMachineID && syncState.BatchSize == 37 && syncState.LastCleanSync == "2000-01-01T00:00:00Z" && syncState.FeedSyncCursor == "2000-01-01T00:00:00Z"
 	})).Return(&awsdynamodb.PutItemOutput{}, nil)
 
 	mockedStateTracking.On("PutItem", mock.MatchedBy(func(sensorData sensordata.SensorData) bool {
-		return sensorData.OSBuild == "20D5029f" && sensorData.SerialNum == "C02123456789" && sensorData.MachineID == inputMachineID && sensorData.PrimaryUser == "nobody" && sensorData.BinaryRuleCount == 3 && sensorData.CompilerRuleCount == 0
+		if sensorData.OSBuild != preflightRequestBody.OSBuild {
+			return false
+		}
+		if sensorData.OSVersion != preflightRequestBody.OSVersion {
+			return false
+		}
+		if sensorData.SantaVersion != preflightRequestBody.SantaVersion {
+			return false
+		}
+		if sensorData.ClientMode != preflightRequestBody.ClientMode {
+			return false
+		}
+		if sensorData.SerialNum != preflightRequestBody.SerialNumber {
+			return false
+		}
+		if sensorData.PrimaryUser != preflightRequestBody.PrimaryUser {
+			return false
+		}
+		if sensorData.CertificateRuleCount != preflightRequestBody.CertificateRuleCount {
+			return false
+		}
+		if sensorData.TeamIDRuleCount != preflightRequestBody.TeamIDRuleCount {
+			return false
+		}
+		if sensorData.SigningIDRuleCount != preflightRequestBody.SigningIDRuleCount {
+			return false
+		}
+		if sensorData.CDHashRuleCount != preflightRequestBody.CDHashRuleCount {
+			return false
+		}
+		if sensorData.BinaryRuleCount != preflightRequestBody.BinaryRuleCount {
+			return false
+		}
+		if sensorData.RequestCleanSync != preflightRequestBody.RequestCleanSync {
+			return false
+		}
+		return true
 	})).Return(&awsdynamodb.PutItemOutput{}, nil)
 
 	h := &PostPreflightHandler{
@@ -203,7 +250,7 @@ func TestHandler_OK(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 
 	// Ensure that the response matches the configuration returned
-	assert.Equal(t, `{"client_mode":"LOCKDOWN","blocked_path_regex":"","allowed_path_regex":"","batch_size":37,"enable_bundles":true,"enable_transitive_rules":false,"clean_sync":true,"upload_logs_url":"/aaa"}`, resp.Body)
+	assert.Equal(t, `{"client_mode":"LOCKDOWN","blocked_path_regex":"","allowed_path_regex":"(^/Applications)","batch_size":37,"enable_bundles":true,"enable_transitive_rules":false,"upload_logs_url":"/aaa","sync_type":"clean"}`, resp.Body)
 }
 
 func TestHandler_OK_Refresh_CleanSync(t *testing.T) {
@@ -212,24 +259,34 @@ func TestHandler_OK_Refresh_CleanSync(t *testing.T) {
 	timeProvider := clock.FrozenTimeProvider{
 		Current: now,
 	}
+
+	preflightRequestBody := &PreflightRequest{
+		OSBuild:              "23E214",
+		OSVersion:            "14.4",
+		SantaVersion:         "2024.2",
+		Hostname:             "my-awesome-macbook-pro",
+		ClientMode:           types.Lockdown,
+		SerialNumber:         "C02123456789",
+		PrimaryUser:          "nobody",
+		CertificateRuleCount: 2364,
+		TeamIDRuleCount:      0,
+		SigningIDRuleCount:   12,
+		CDHashRuleCount:      34,
+		BinaryRuleCount:      43676,
+		RequestCleanSync:     false,
+	}
+
+	b, err := json.Marshal(preflightRequestBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	var request = events.APIGatewayProxyRequest{
 		HTTPMethod:     "POST",
 		Resource:       "/preflight/{machine_id}",
 		PathParameters: map[string]string{"machine_id": inputMachineID},
 		Headers:        map[string]string{"Content-Type": "application/json"},
-		Body: `{
-	"os_build":"20D5029f",
-	"santa_version":"2021.1",
-	"hostname":"my-awesome-macbook-pro.attlocal.net",
-	"transitive_rule_count":0,
-	"os_version":"11.2",
-	"certificate_rule_count":2,
-	"client_mode":"MONITOR",
-	"serial_num":"C02123456789",
-	"binary_rule_count":3,
-	"primary_user":"nobody",
-	"compiler_rule_count":0
-}`,
+		Body:           string(b),
 	}
 	mockedConfigurationFetcher := &MockDynamodb{}
 
@@ -238,7 +295,7 @@ func TestHandler_OK_Refresh_CleanSync(t *testing.T) {
 		BatchSize:        37,
 		UploadLogsURL:    "/aaa",
 		EnableBundles:    true,
-		AllowedPathRegex: "",
+		AllowedPathRegex: "(^/Applications)",
 		CleanSync:        false,
 	}
 
@@ -275,7 +332,43 @@ func TestHandler_OK_Refresh_CleanSync(t *testing.T) {
 	})).Return(&awsdynamodb.PutItemOutput{}, nil)
 
 	mockedStateTracking.On("PutItem", mock.MatchedBy(func(sensorData sensordata.SensorData) bool {
-		return sensorData.OSBuild == "20D5029f" && sensorData.SerialNum == "C02123456789" && sensorData.MachineID == inputMachineID && sensorData.PrimaryUser == "nobody" && sensorData.BinaryRuleCount == 3 && sensorData.CompilerRuleCount == 0
+		if sensorData.OSBuild != preflightRequestBody.OSBuild {
+			return false
+		}
+		if sensorData.OSVersion != preflightRequestBody.OSVersion {
+			return false
+		}
+		if sensorData.SantaVersion != preflightRequestBody.SantaVersion {
+			return false
+		}
+		if sensorData.ClientMode != preflightRequestBody.ClientMode {
+			return false
+		}
+		if sensorData.SerialNum != preflightRequestBody.SerialNumber {
+			return false
+		}
+		if sensorData.PrimaryUser != preflightRequestBody.PrimaryUser {
+			return false
+		}
+		if sensorData.CertificateRuleCount != preflightRequestBody.CertificateRuleCount {
+			return false
+		}
+		if sensorData.TeamIDRuleCount != preflightRequestBody.TeamIDRuleCount {
+			return false
+		}
+		if sensorData.SigningIDRuleCount != preflightRequestBody.SigningIDRuleCount {
+			return false
+		}
+		if sensorData.CDHashRuleCount != preflightRequestBody.CDHashRuleCount {
+			return false
+		}
+		if sensorData.BinaryRuleCount != preflightRequestBody.BinaryRuleCount {
+			return false
+		}
+		if sensorData.RequestCleanSync != preflightRequestBody.RequestCleanSync {
+			return false
+		}
+		return true
 	})).Return(&awsdynamodb.PutItemOutput{}, nil)
 
 	h := &PostPreflightHandler{
@@ -291,7 +384,7 @@ func TestHandler_OK_Refresh_CleanSync(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 
 	// Ensure that the response matches the configuration returned
-	assert.Equal(t, `{"client_mode":"LOCKDOWN","blocked_path_regex":"","allowed_path_regex":"","batch_size":37,"enable_bundles":true,"enable_transitive_rules":false,"clean_sync":true,"upload_logs_url":"/aaa"}`, resp.Body)
+	assert.Equal(t, `{"client_mode":"LOCKDOWN","blocked_path_regex":"","allowed_path_regex":"(^/Applications)","batch_size":37,"enable_bundles":true,"enable_transitive_rules":false,"upload_logs_url":"/aaa","sync_type":"clean"}`, resp.Body)
 }
 
 func TestHandler_OK_No_Refresh_CleanSync(t *testing.T) {
@@ -379,5 +472,5 @@ func TestHandler_OK_No_Refresh_CleanSync(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 
 	// Ensure that the response matches the configuration returned
-	assert.Equal(t, `{"client_mode":"LOCKDOWN","blocked_path_regex":"","allowed_path_regex":"","batch_size":37,"enable_bundles":true,"enable_transitive_rules":false,"upload_logs_url":"/aaa"}`, resp.Body)
+	assert.Equal(t, `{"client_mode":"LOCKDOWN","blocked_path_regex":"","allowed_path_regex":"","batch_size":37,"enable_bundles":true,"enable_transitive_rules":false,"upload_logs_url":"/aaa","sync_type":"normal"}`, resp.Body)
 }
