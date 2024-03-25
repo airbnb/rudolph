@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -58,7 +57,7 @@ func repair(scanService scan.ScanService, deleter dynamodb.DeleteItemAPI) error 
 		var items []dynamodbItem
 		err = attributevalue.UnmarshalListOfMaps(out.Items, &items)
 		if err != nil {
-			err = errors.Wrap(err, "failed to unmarshall output items")
+			err = fmt.Errorf("failed to unmarshal output items: %w", err)
 			return
 		}
 
@@ -68,7 +67,7 @@ func repair(scanService scan.ScanService, deleter dynamodb.DeleteItemAPI) error 
 				if delete {
 					_, err := deleter.DeleteItem(item.PrimaryKey)
 					if err != nil {
-						return errors.Wrap(err, "failed to delete item")
+						return fmt.Errorf("failed to delete item: %w", err)
 					}
 					fmt.Printf("      Item Deleted\n")
 				}

@@ -1,13 +1,13 @@
 package ruledownload
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/model/feedrules"
 	"github.com/airbnb/rudolph/pkg/model/syncstate"
-	"github.com/pkg/errors"
 )
 
 // ruledownloadCursor is passed between the server and client between successive API calls to /ruledownload
@@ -100,7 +100,7 @@ func (c concreteRuledownloadCursorService) ConstructCursor(ruledownloadRequest R
 		// Get the sync state as set by /preflight. The sync state will contain the final result of the previous
 		syncState, eerr := syncstate.GetByMachineID(c.getter, machineID)
 		if eerr != nil {
-			err = errors.Wrap(eerr, "failed to get previous syncstate")
+			err = fmt.Errorf("failed to get previous syncstate: %w", eerr)
 			return
 		}
 

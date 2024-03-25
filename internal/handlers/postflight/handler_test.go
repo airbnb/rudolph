@@ -1,10 +1,10 @@
 package postflight
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 

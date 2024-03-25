@@ -1,6 +1,7 @@
 package preflight
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -10,7 +11,6 @@ import (
 	apiRequest "github.com/airbnb/rudolph/pkg/request"
 	"github.com/airbnb/rudolph/pkg/response"
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/pkg/errors"
 )
 
 type PostPreflightHandler struct {
@@ -140,7 +140,7 @@ func (h *PostPreflightHandler) handlePreflight(machineID string, preflightReques
 	)
 
 	if err != nil {
-		err = errors.Wrapf(err, "Encountered error trying to save new sync state")
+		err = fmt.Errorf("encountered error trying to save new sync state: %w", err)
 		return response.APIResponse(http.StatusInternalServerError, err)
 	}
 

@@ -1,8 +1,6 @@
 package types
 
-import (
-	"github.com/pkg/errors"
-)
+import "fmt"
 
 type SyncType string
 
@@ -28,7 +26,7 @@ func (s *SyncType) UnmarshalText(text []byte) error {
 	case "CLEAN_ALL":
 		*s = SyncTypeCleanAll
 	default:
-		return errors.Errorf("unknown sync_type value %q", syncType)
+		return fmt.Errorf("unknown sync_type value %q", syncType)
 	}
 	return nil
 }
@@ -43,6 +41,6 @@ func (s SyncType) MarshalText() ([]byte, error) {
 	case SyncTypeCleanAll:
 		return []byte(SyncTypeCleanAll), nil
 	default:
-		return nil, errors.Errorf("unknown sync_type %s", s)
+		return nil, fmt.Errorf("unknown sync_type %s", s)
 	}
 }

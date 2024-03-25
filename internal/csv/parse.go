@@ -6,8 +6,6 @@ import (
 	"io"
 	"os"
 	"sync"
-
-	"github.com/pkg/errors"
 )
 
 // ParseCsvFile takes the full path to a .csv file and parses it. Each line yielded gets fed to an
@@ -20,14 +18,14 @@ func ParseCsvFile(filepath string) (output chan map[string]string, err error) {
 
 	f, err := os.Open(filepath)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to open file: %s", filepath)
+		err = fmt.Errorf("failed to open file: %s: %w", filepath, err)
 		return
 	}
 
 	reader := csv.NewReader(f)
 	header, err := reader.Read()
 	if err != nil {
-		err = errors.Wrapf(err, "failed to read csv file: %s", filepath)
+		err = fmt.Errorf("failed to read csv file: %s: %w", filepath, err)
 		return
 	}
 
@@ -67,13 +65,13 @@ func WriteCsvFile(
 ) (wg *sync.WaitGroup, err error) {
 	f, err := os.Create(filename)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to open file for writing: %s", filename)
+		err = fmt.Errorf("failed to open file for writing: %s: %w", filename, err)
 		return
 	}
 	err = f.Truncate(0)
 	if err != nil {
 		f.Close()
-		err = errors.Wrap(err, "file is not writable")
+		err = fmt.Errorf("file is not writable: %w", err)
 		return
 	}
 
@@ -81,7 +79,7 @@ func WriteCsvFile(
 
 	err = csvWriter.Write(headers)
 	if err != nil {
-		err = errors.Wrap(err, "could not write csv header")
+		err = fmt.Errorf("could not write csv header: %w", err)
 		return
 	}
 
@@ -95,7 +93,7 @@ func WriteCsvFile(
 		for record := range input {
 			err = csvWriter.Write(record)
 			if err != nil {
-				err = errors.Wrap(err, "could not write csv line")
+				err = fmt.Errorf("could not write csv line: %w", err)
 				return
 			}
 		}

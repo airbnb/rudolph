@@ -14,7 +14,6 @@ import (
 	"github.com/airbnb/rudolph/pkg/model/globalrules"
 	"github.com/airbnb/rudolph/pkg/model/machinerules"
 	"github.com/airbnb/rudolph/pkg/types"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -84,7 +83,7 @@ func applyPolicyForPath(timeProvider clock.TimeProvider, client dynamodb.DynamoD
 	if !tf.IsGlobal {
 		machineID, err = tf.GetMachineID()
 		if err != nil {
-			return errors.Wrap(err, "Failed to get MachineID!")
+			return fmt.Errorf("failed to get MachineID: %w", err)
 		}
 		// All args set up; send confirmation message
 		if tf.IsTargetSelf() {
@@ -115,7 +114,7 @@ func applyPolicyForPath(timeProvider clock.TimeProvider, client dynamodb.DynamoD
 			err = machinerules.AddNewMachineRule(client, machineID, sha256, ruleType, policy, description, expires)
 		}
 		if err != nil {
-			return errors.Wrap(err, "Could not upload rule to dynamodb")
+			return fmt.Errorf("could not upload rule to DynamoDB: %w", err)
 		}
 		fmt.Println("Successfully sent a rule to dynamodb")
 	} else {

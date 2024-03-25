@@ -1,13 +1,14 @@
 package machineconfiguration
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"strings"
 
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/types"
-	"github.com/pkg/errors"
 )
 
 // SetGlobalConfig writes a global configuration to the DynamoDB table via a PutItem API call
@@ -34,7 +35,7 @@ func SetGlobalConfig(client dynamodb.PutItemAPI, clientMode types.ClientMode, bl
 
 	_, err = client.PutItem(globalConfigRow)
 	if err != nil {
-		log.Print(errors.Wrap(err, " setting global config failed"))
+		log.Print(fmt.Errorf("setting global config failed: %w", err))
 	}
 
 	return
@@ -61,7 +62,7 @@ func SetMachineConfig(client dynamodb.PutItemAPI, machineID string, clientMode t
 
 	_, err = client.PutItem(machineConfigRow)
 	if err != nil {
-		log.Print(errors.Wrap(err, " setting global config failed"))
+		log.Print(fmt.Errorf("setting global config failed: %w", err))
 	}
 
 	return
@@ -169,7 +170,7 @@ func (c ConcreteGlobalConfigurationSetter) setGlobalConfig(config MachineConfigu
 
 	_, err := c.setter.PutItem(globalConfigRow)
 	if err != nil {
-		log.Print(errors.Wrap(err, " setting global config failed"))
+		log.Print(fmt.Errorf("setting global config failed: %w", err))
 	}
 
 	// Attempt to set the new global configuration into cache
@@ -207,7 +208,7 @@ func (c ConcreteMachineConfigurationSetter) setMachineConfig(machineID string, c
 
 	_, err := c.setter.PutItem(machineConfigRow)
 	if err != nil {
-		log.Print(errors.Wrap(err, " setting machine config failed"))
+		log.Print(fmt.Errorf("setting machine config failed: %w", err))
 	}
 	return nil
 }

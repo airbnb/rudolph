@@ -3,6 +3,8 @@ package preflight
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
+	"fmt"
 	"log"
 	"math"
 	"math/big"
@@ -10,7 +12,6 @@ import (
 
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/model/syncstate"
-	"github.com/pkg/errors"
 )
 
 // Select a MOD that will enable a proper dithering technique such as a proven cyclic group
@@ -119,7 +120,7 @@ func machineIDToInt(machineID string) (int, error) {
 	machineIDHash := sha256.New()
 	_, err := machineIDHash.Write([]byte(machineID))
 	if err != nil {
-		return result, errors.Wrap(err, "error generating hash from machineID")
+		return result, fmt.Errorf("error generating hash from machineID: %w", err)
 	}
 
 	// Convert machineIDHash into a hex which will be converted into a *int
@@ -128,7 +129,7 @@ func machineIDToInt(machineID string) (int, error) {
 	//machineIDFloat is required to perform mod math so convert the big int into a float
 	machineIDFloat, err := strconv.ParseFloat(bigInt.String(), 64)
 	if err != nil {
-		return result, errors.Wrap(err, "error parsing machineID into a float")
+		return result, fmt.Errorf("error parsing machineID into a float: %w", err)
 	}
 	// chaos number is 1d10 based on the machineID to remain consistent
 	result = int(math.Mod(machineIDFloat, MOD))

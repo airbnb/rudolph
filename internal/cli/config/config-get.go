@@ -9,7 +9,7 @@ import (
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/model/machineconfiguration"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 )
 
@@ -51,14 +51,14 @@ func getConfig(service machineconfiguration.MachineConfigurationService, tf flag
 
 		tmpconfig, _, eerr := service.GetIntendedGlobalConfig()
 		if eerr != nil {
-			err = errors.Wrapf(eerr, "failed to do dynamodb get")
+			err = fmt.Errorf("failed to do DynamoDB get: %w", eerr)
 			return
 		}
 		config = tmpconfig
 	} else {
 		machineID, eerr := tf.GetMachineID()
 		if eerr != nil {
-			err = errors.Wrap(err, "Failed to get MachineUUID!")
+			err = fmt.Errorf("failed to get MachineUUID: %w", eerr)
 			return
 		}
 		if tf.IsTargetSelf() {
@@ -70,7 +70,7 @@ func getConfig(service machineconfiguration.MachineConfigurationService, tf flag
 		}
 		tmpconfig, eerr := service.GetIntendedConfig(machineID)
 		if eerr != nil {
-			err = errors.Wrapf(eerr, "failed to do dynamodb get")
+			err = fmt.Errorf("failed to do dynamodb get: %w", eerr)
 			return
 		}
 		config = tmpconfig

@@ -1,13 +1,14 @@
 package globalrules
 
 import (
+	"fmt"
+
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/model/feedrules"
 	"github.com/airbnb/rudolph/pkg/model/rules"
 	"github.com/airbnb/rudolph/pkg/types"
 	awsdynamodbtypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/pkg/errors"
 )
 
 func UpdateGlobalRule(time clock.TimeProvider, client dynamodb.TransactWriteItemsAPI, sha256 string, ruleType types.RuleType, rulePolicy types.Policy) (err error) {
@@ -55,7 +56,7 @@ func UpdateGlobalRule(time clock.TimeProvider, client dynamodb.TransactWriteItem
 	// Send the TransactWriteRequest
 	_, err = client.TransactWriteItems(transactItems, nil)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to update global rule")
+		err = fmt.Errorf("failed to update global rule: %w", err)
 		return
 	}
 	return

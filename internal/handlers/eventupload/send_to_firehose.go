@@ -1,10 +1,10 @@
 package eventupload
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/airbnb/rudolph/pkg/firehose"
-	"github.com/pkg/errors"
 )
 
 func sendToFirehose(firehoseClient firehose.FirehoseClient, machineID string, events []EventUploadEvent) error {
@@ -12,7 +12,7 @@ func sendToFirehose(firehoseClient firehose.FirehoseClient, machineID string, ev
 	err := firehoseClient.Send(machineID, firehose.FirehoseEvents{Items: forwardedEvents})
 	if err != nil {
 		log.Printf("%s\n%s", err.Error(), "upload to firehose was not successful")
-		return errors.Wrap(err, "failed to events to AWS Firehose")
+		return fmt.Errorf("failed to events to AWS Firehose: %w", err)
 	}
 
 	return nil

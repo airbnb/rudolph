@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/airbnb/rudolph/internal/cli/santa_sensor"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +26,7 @@ func info() error {
 	// FIXME (derek.wang) allow more machine ids
 	machineID, err := santa_sensor.GetSelfMachineID()
 	if err != nil {
-		return errors.Wrap(err, "Failed to get MachineUUID!")
+		return fmt.Errorf("failed to get MachineUUID: %w", err)
 	}
 
 	fmt.Println("Your machineUUID is: ", machineID)

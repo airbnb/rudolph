@@ -1,12 +1,14 @@
 package globalrules
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	awsdynamodb "github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/pkg/errors"
 )
 
 func PingDatabase(client dynamodb.QueryAPI) (err error) {
@@ -30,7 +32,7 @@ func GetPaginatedGlobalRules(client dynamodb.QueryAPI, limit int, exclusiveStart
 	if exclusiveStartKey != nil {
 		exclusiveStartKeyInput, err = attributevalue.MarshalMap(exclusiveStartKey)
 		if err != nil {
-			err = errors.Wrap(err, "failed to marshall exclusiveStartKey")
+			err = fmt.Errorf("failed to marshall exclusiveStartKey: %w", err)
 			return
 		}
 	}
@@ -47,21 +49,21 @@ func GetPaginatedGlobalRules(client dynamodb.QueryAPI, limit int, exclusiveStart
 
 	result, err := client.Query(input)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to read rules from DynamoDB for partitionKey %q", partitionKey)
+		err = fmt.Errorf("failed to read rules from DynamoDB for partitionKey %q: %w", partitionKey, err)
 		return
 	}
 
 	if result.LastEvaluatedKey != nil {
 		err = attributevalue.UnmarshalMap(result.LastEvaluatedKey, &lastEvaluatedKey)
 		if err != nil {
-			err = errors.Wrap(err, "failed to unmarshall LastEvaluatedKey")
+			err = fmt.Errorf("failed to unmarshall LastEvaluatedKey: %w", err)
 			return
 		}
 	}
 
 	err = attributevalue.UnmarshalListOfMaps(result.Items, &items)
 	if err != nil {
-		err = errors.Wrap(err, "failed to unmarshal result from DynamoDB")
+		err = fmt.Errorf("failed to unmarshal result from DynamoDB: %w", err)
 		return
 	}
 	return

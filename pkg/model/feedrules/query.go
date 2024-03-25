@@ -1,6 +1,8 @@
 package feedrules
 
 import (
+	"errors"
+	"fmt"
 	"log"
 
 	"github.com/airbnb/rudolph/pkg/dynamodb"
@@ -8,7 +10,6 @@ import (
 	awsdynamodb "github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/pkg/errors"
 )
 
 // GetPaginatedFeedRules returns zero or more rules on the feed, up to the limit
@@ -30,7 +31,7 @@ func GetPaginatedFeedRules(client dynamodb.QueryAPI, limit int, exclusiveStartKe
 	if exclusiveStartKey != nil {
 		exclusiveStartKeyInput, err = attributevalue.MarshalMap(exclusiveStartKey)
 		if err != nil {
-			err = errors.Wrap(err, "failed to marshall exclusiveStartKey")
+			err = fmt.Errorf("failed to marshall exclusiveStartKey: %w", err)
 			return
 		}
 	}
@@ -47,14 +48,14 @@ func GetPaginatedFeedRules(client dynamodb.QueryAPI, limit int, exclusiveStartKe
 
 	result, err := client.Query(input)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to read feed rules from DynamoDB for partitionKey %q", partitionKey)
+		err = fmt.Errorf("failed to read feed rules from DynamoDB for partitionKey %q: %w", partitionKey, err)
 		return
 	}
 
 	if result.LastEvaluatedKey != nil {
 		err = attributevalue.UnmarshalMap(result.LastEvaluatedKey, &lastEvaluatedKey)
 		if err != nil {
-			err = errors.Wrap(err, "failed to unmarshall LastEvaluatedKey")
+			err = fmt.Errorf("failed to unmarshall LastEvaluatedKey: %w", err)
 			return
 		}
 		log.Printf("    lastEvaluatedKey: %+v", lastEvaluatedKey)
@@ -62,7 +63,7 @@ func GetPaginatedFeedRules(client dynamodb.QueryAPI, limit int, exclusiveStartKe
 
 	err = attributevalue.UnmarshalListOfMaps(result.Items, &items)
 	if err != nil {
-		err = errors.Wrap(err, "failed to unmarshal result from DynamoDB")
+		err = fmt.Errorf("failed to unmarshal result from DynamoDB: %w", err)
 		return
 	}
 	// log.Printf("    got %d items from query.", len(*items))

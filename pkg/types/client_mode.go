@@ -1,8 +1,6 @@
 package types
 
-import (
-	"github.com/pkg/errors"
-)
+import "fmt"
 
 // ClientMode specifies which mode the Santa client will evaluate rules in.
 type ClientMode int
@@ -20,7 +18,7 @@ func (c *ClientMode) UnmarshalText(text []byte) error {
 	case "LOCKDOWN":
 		*c = Lockdown
 	default:
-		return errors.Errorf("unknown client_mode value %q", mode)
+		return fmt.Errorf("unknown client_mode value %q", mode)
 	}
 	return nil
 }
@@ -33,6 +31,6 @@ func (c ClientMode) MarshalText() ([]byte, error) {
 	case Lockdown:
 		return []byte("LOCKDOWN"), nil
 	default:
-		return nil, errors.Errorf("unknown client_mode %d", c)
+		return nil, fmt.Errorf("unknown client_mode %d", c)
 	}
 }

@@ -3,7 +3,6 @@ package config
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"text/tabwriter"
@@ -12,7 +11,6 @@ import (
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/model/machineconfiguration"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -67,7 +65,7 @@ func updateConfig(
 	} else {
 		machineID, err = tf.GetMachineID()
 		if err != nil {
-			return errors.Wrap(err, "Failed to get MachineID!")
+			return fmt.Errorf("failed to get MachineID: %w", err)
 		}
 	}
 
@@ -115,7 +113,7 @@ func updateConfig(
 	}
 
 	if err != nil {
-		log.Print(errors.Wrapf(err, " error writing the configuration to the sync server..."))
+		return fmt.Errorf("error writing the configuration to the sync server: %w", err)
 	} else {
 		fmt.Println("Success! Configuration was sent properly to DynamoDB...")
 	}

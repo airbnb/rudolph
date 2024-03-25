@@ -2,13 +2,13 @@ package santa_sensor
 
 import (
 	"encoding/json"
+	"fmt"
 	"os/exec"
-
-	"github.com/pkg/errors"
 )
 
 // SantaFileInfo maps to the data output by santactl:
-//  https://github.com/google/santa/blob/d17aeac2f4331584db51de432ace3465026e1259/Source/santactl/Commands/SNTCommandFileInfo.m#L199-L214
+//
+//	https://github.com/google/santa/blob/d17aeac2f4331584db51de432ace3465026e1259/Source/santactl/Commands/SNTCommandFileInfo.m#L199-L214
 type santaFileInfo struct {
 	Path                  string             `json:"Path"`
 	SHA256                string             `json:"SHA-256"`
@@ -29,7 +29,8 @@ type santaFileInfo struct {
 }
 
 // SigningChainInfo maps to the data output by santactl for signing info:
-//  https://github.com/google/santa/blob/d17aeac2f4331584db51de432ace3465026e1259/Source/santactl/Commands/SNTCommandFileInfo.m#L421-L427
+//
+//	https://github.com/google/santa/blob/d17aeac2f4331584db51de432ace3465026e1259/Source/santactl/Commands/SNTCommandFileInfo.m#L421-L427
 type signingChainInfo struct {
 	SHA256             string `json:"SHA-256"`
 	SHA1               string `json:"SHA-1"`
@@ -52,11 +53,11 @@ func RunSantaFileInfo(filepath string) (santaFileInfo, error) {
 	var allInfo []santaFileInfo
 	err = json.Unmarshal(output, &allInfo)
 	if err != nil {
-		return fileInfo, errors.Wrap(err, "could not load file info from santa")
+		return fileInfo, fmt.Errorf("could not load file info from santa: %w", err)
 	}
 
 	if len(allInfo) == 0 {
-		return fileInfo, errors.Wrap(err, "zero items found in loaded file info from santa")
+		return fileInfo, fmt.Errorf("zero items found in loaded file info from santa: %w", err)
 	}
 
 	// We only support running on one item right now (not directories of items) so get the first one

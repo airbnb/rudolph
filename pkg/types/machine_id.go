@@ -1,10 +1,9 @@
 package types
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
-
-	"github.com/pkg/errors"
 )
 
 var machineRegexp = regexp.MustCompile(`^[A-F0-9]{8}\-[A-F0-9]{4}\-[A-F0-9]{4}\-[A-F0-9]{4}\-[A-F0-9]{12}$`)

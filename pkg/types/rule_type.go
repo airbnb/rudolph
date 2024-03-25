@@ -1,9 +1,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/pkg/errors"
 )
 
 // RuleType represents a Santa rule type.
@@ -54,7 +55,7 @@ func (r *RuleType) UnmarshalText(text []byte) error {
 	case "TEAMID":
 		*r = RuleTypeTeamID
 	default:
-		return errors.Errorf("unknown rule_type value %q", t)
+		return fmt.Errorf("unknown rule_type value %q", t)
 	}
 	return nil
 }
@@ -71,7 +72,7 @@ func (r RuleType) MarshalText() ([]byte, error) {
 	case RuleTypeTeamID:
 		return []byte("TEAMID"), nil
 	default:
-		return nil, errors.Errorf("unknown rule_type %d", r)
+		return nil, fmt.Errorf("unknown rule_type %d", r)
 	}
 }
 
@@ -90,7 +91,7 @@ func (r RuleType) MarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) err
 	case RuleTypeTeamID:
 		s = "4"
 	default:
-		return errors.Errorf("unknown rule_type value %q", r)
+		return fmt.Errorf("unknown rule_type value %q", r)
 	}
 	// av.S = &s
 	av.N = &s
@@ -118,7 +119,7 @@ func (r *RuleType) UnmarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) 
 	case "TEAMID":
 		*r = RuleTypeTeamID
 	default:
-		return errors.Errorf("unknown rule_type value %q", t)
+		return fmt.Errorf("unknown rule_type value %q", t)
 	}
 
 	return nil

@@ -1,6 +1,7 @@
 package syncstate
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -8,7 +9,6 @@ import (
 	"github.com/airbnb/rudolph/pkg/types"
 	awsdynamodb "github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	awstypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 

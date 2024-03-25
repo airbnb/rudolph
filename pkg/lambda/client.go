@@ -2,11 +2,11 @@ package lambda
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awssession "github.com/aws/aws-sdk-go/aws/session"
 	awslambda "github.com/aws/aws-sdk-go/service/lambda"
-	"github.com/pkg/errors"
 )
 
 // LambdaEvents is a single event entry that appends the MachineID with the EventUploadEvent details
@@ -38,7 +38,7 @@ type client struct {
 func (c client) Send(machineID string, events LambdaEvents) (err error) {
 	item, err := json.Marshal(events)
 	if err != nil {
-		err = errors.Wrap(err, "failed json marshall lambda payload events")
+		err = fmt.Errorf("failed json marshall lambda payload events: %w", err)
 
 		return
 	}
@@ -54,7 +54,7 @@ func (c client) Send(machineID string, events LambdaEvents) (err error) {
 
 	_, err = c.lambdaService.Invoke(input)
 	if err != nil {
-		err = errors.Wrap(err, "lambda:InvokeFunction call failed")
+		err = fmt.Errorf("lambda:InvokeFunction call failed: %w", err)
 	}
 
 	return

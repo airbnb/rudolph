@@ -2,10 +2,10 @@ package santa_sensor
 
 import (
 	"encoding/xml"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
-
-	"github.com/pkg/errors"
 )
 
 const (
@@ -30,7 +30,7 @@ func GetMyMachineUUID() (machineUUID string, err error) {
 	xmlFile, err := os.Open(defaultSantaMachinePlistFile)
 	// if we os.Open returns an error then handle it
 	if err != nil {
-		err = errors.Wrap(err, "could not open santa machine mapping plist")
+		err = fmt.Errorf("could not open santa machine mapping plist: %w", err)
 		return
 	}
 

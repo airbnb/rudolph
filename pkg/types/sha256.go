@@ -1,10 +1,9 @@
 package types
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
-
-	"github.com/pkg/errors"
 )
 
 var sha256Regexp = regexp.MustCompile(`^[a-f0-9]{64}$`)

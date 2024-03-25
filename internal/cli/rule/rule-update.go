@@ -2,6 +2,7 @@ package rule
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -13,7 +14,6 @@ import (
 	"github.com/airbnb/rudolph/pkg/model/globalrules"
 	"github.com/airbnb/rudolph/pkg/model/machinerules"
 	"github.com/airbnb/rudolph/pkg/types"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -114,7 +114,7 @@ func (rh *ruleHandler) updateRulePolicy(tf flags.TargetFlags, rf flags.RuleInfoF
 	if !tf.IsGlobal {
 		machineID, err = tf.GetMachineID()
 		if err != nil {
-			return errors.Wrap(err, "Failed to get MachineID!")
+			return fmt.Errorf("failed to get MachineID: %w", err)
 		}
 		// All args set up; send confirmation message
 		if tf.IsTargetSelf() {
@@ -201,7 +201,7 @@ func (rh *ruleHandler) updateRulePolicy(tf flags.TargetFlags, rf flags.RuleInfoF
 			err = rh.machineRuleUpdater.UpdateMachineRulePolicy(machineID, sha256, ruleType, rulePolicy)
 		}
 		if err != nil {
-			return errors.Wrap(err, "Could not upload rule to dynamodb")
+			return fmt.Errorf("could not upload rule to dynamodb: %w", err)
 		}
 		fmt.Println("Successfully updated the rule on dynamodb")
 	} else {

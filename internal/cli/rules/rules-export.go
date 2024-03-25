@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/airbnb/rudolph/internal/csv"
@@ -156,7 +155,7 @@ func getRules(client dynamodb.QueryAPI, callback func(globalrules.GlobalRuleRow)
 	for {
 		rules, nextkey, inerr := globalrules.GetPaginatedGlobalRules(client, 50, key)
 		if inerr != nil {
-			err = errors.Wrap(inerr, "something went wrong querying global rules")
+			err = fmt.Errorf("something went wrong querying global rules: %w", inerr)
 			return
 		}
 		if len(*rules) == 0 {

@@ -1,6 +1,7 @@
 package machineconfiguration
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -9,7 +10,6 @@ import (
 	rudolphtypes "github.com/airbnb/rudolph/pkg/types"
 	awsdynamodb "github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
