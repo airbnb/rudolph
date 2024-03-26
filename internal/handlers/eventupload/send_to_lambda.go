@@ -1,6 +1,7 @@
 package eventupload
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -9,9 +10,15 @@ import (
 
 const RUDOLPH_DIRECT_SOURCE = "rudolph-direct"
 
-func sendToLambda(kinesisClient lambda.LambdaClient, machineID string, events []EventUploadEvent) error {
+func sendToLambda(
+	ctx context.Context,
+	lambdaClient lambda.LambdaClient,
+	machineID string,
+	events []EventUploadEvent,
+) error {
 	var forwardedEvents = convertRequestEventsToUploadEvents(machineID, events)
-	err := kinesisClient.Send(
+	err := lambdaClient.Send(
+		ctx,
 		machineID,
 		lambda.LambdaEvents{
 			Source: RUDOLPH_DIRECT_SOURCE,
