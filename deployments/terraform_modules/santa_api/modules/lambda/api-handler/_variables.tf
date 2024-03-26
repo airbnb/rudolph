@@ -50,3 +50,15 @@ variable "api_gateway_execution_arn" {
   type        = string
   description = "Execution ARN of the API gateway"
 }
+
+variable "lambda_memory_size" {
+  type        = number
+  description = "Lambda function runtime memory size in MB. Valid value between 128 MB to 10,240 MB (10 GB), in 64 MB increments."
+  default     = 128
+}
+
+variable "lambda_timeout_seconds" {
+  type        = number
+  description = "Lambda function timeout in seconds. Default lambda's timeout is intentionally short right now at 10 seconds."
+  default     = 10
+}

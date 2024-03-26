@@ -13,12 +13,13 @@ resource "aws_lambda_function" "api_handler" {
   role          = aws_iam_role.api_handler_role.arn
   handler       = local.handler
   runtime       = local.runtime
-  publish       = true
+  publish       = false
   architectures = ["arm64"]
 
   s3_bucket        = var.lambda_source_bucket
   s3_key           = var.lambda_source_key
   source_code_hash = var.lambda_source_hash
+  memory_size      = var.lambda_memory_size
 
   # The lambda's timeout is intentionally short right now.
   #   Most HTTP API requests should not take a huge amount of time, or they will cause the UI to hang which is a
@@ -28,7 +29,7 @@ resource "aws_lambda_function" "api_handler" {
   #     2) Use POST and return a created resource via http 201 or 202. Then, have the server asynchronously process
   #        this resource until it reaches a consistent state. Meanwhile, the client can poll with GET requests
   #        until the resource reaches a consistent state.
-  timeout = 5
+  timeout = var.lambda_timeout_seconds
 
   dynamic "environment" {
     for_each = length(var.env_vars) == 0 ? [] : [1]
