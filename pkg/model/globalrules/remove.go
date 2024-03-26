@@ -1,6 +1,7 @@
 package globalrules
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/airbnb/rudolph/pkg/clock"
@@ -9,7 +10,6 @@ import (
 	"github.com/airbnb/rudolph/pkg/types"
 	awsdynamodbtypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 )
 
 // RemoveGlobalRule will remove the rule from the global repository of rules.
@@ -18,7 +18,7 @@ import (
 func RemoveGlobalRule(timeProvider clock.TimeProvider, getter dynamodb.GetItemAPI, transacter dynamodb.TransactWriteItemsAPI, ruleSortKey string, txnIdempotencyKey string) (err error) {
 	rule, err := GetGlobalRuleBySortKey(getter, ruleSortKey)
 	if err != nil {
-		return errors.Wrap(err, "query to retrieve existing rule failed")
+		return fmt.Errorf("query to retrieve existing rule failed: %w", err)
 	}
 	if rule == nil {
 		return errors.New(fmt.Sprintf("no such rule with sk (%s) exists", ruleSortKey))
@@ -27,7 +27,7 @@ func RemoveGlobalRule(timeProvider clock.TimeProvider, getter dynamodb.GetItemAP
 	// Delete the global rule
 	txnDeleteItem, err := transacter.CreateTransactDeleteItem(rule.PrimaryKey)
 	if err != nil {
-		return errors.Wrap(err, "failed to create txn item to delete original rule")
+		return fmt.Errorf("failed to create txn item to delete original rule: %w", err)
 	}
 
 	// In order to get non-clean sync clients to pick up the new rule diff, add it to the feed as a "remove"
@@ -36,7 +36,7 @@ func RemoveGlobalRule(timeProvider clock.TimeProvider, getter dynamodb.GetItemAP
 	feedrule.Policy = types.Remove
 	txnPutItem, err := transacter.CreateTransactPutItem(feedrule)
 	if err != nil {
-		return errors.Wrap(err, "failed to create txn item to add removal to feed")
+		return fmt.Errorf("failed to create txn item to add removal to feed: %w", err)
 	}
 
 	txnItems := []awsdynamodbtypes.TransactWriteItem{
@@ -52,7 +52,7 @@ func RemoveGlobalRule(timeProvider clock.TimeProvider, getter dynamodb.GetItemAP
 	}
 	_, err = transacter.TransactWriteItems(txnItems, &txnIdempotencyKey)
 	if err != nil {
-		return errors.Wrap(err, "transaction delete failed")
+		return fmt.Errorf("transaction delete failed: %w", err)
 	}
 
 	return

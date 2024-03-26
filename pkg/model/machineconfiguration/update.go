@@ -1,18 +1,18 @@
 package machineconfiguration
 
 import (
-	"log"
+	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/types"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/pkg/errors"
 )
 
 // UpdateMachineConfigClientMode updates a machineID specific ClientMode configuration to the DynamoDB table via an UpdateItem API call
-func UpdateMachineConfigClientMode(client dynamodb.UpdateItemAPI, machineID string, newClientMode types.ClientMode) (err error) {
+func UpdateMachineConfigClientMode(client dynamodb.UpdateItemAPI, machineID string, newClientMode types.ClientMode) error {
 	pk := dynamodb.PrimaryKey{
 		PartitionKey: machineConfigurationPK(machineID),
 		SortKey:      machineConfigurationSK(),
@@ -23,16 +23,16 @@ func UpdateMachineConfigClientMode(client dynamodb.UpdateItemAPI, machineID stri
 	}
 
 	//UpdateItem takes a key (pk/sk), item name --> match this to the column/struct tag, and interface to set
-	_, err = client.UpdateItem(pk, clientMode)
+	_, err := client.UpdateItem(pk, clientMode)
 	if err != nil {
-		log.Print(errors.Wrap(err, " setting machine config failed"))
+		return fmt.Errorf("setting machine config failed: %w", err)
 	}
 
-	return
+	return nil
 }
 
 // UpdateGlobalConfigClientMode updates a machineID specific ClientMode configuration to the DynamoDB table via an UpdateItem API call
-func UpdateGlobalConfigClientMode(client dynamodb.UpdateItemAPI, newClientMode types.ClientMode) (err error) {
+func UpdateGlobalConfigClientMode(client dynamodb.UpdateItemAPI, newClientMode types.ClientMode) error {
 	pk := dynamodb.PrimaryKey{
 		PartitionKey: globalConfigurationPK,
 		SortKey:      machineConfigurationSK(),
@@ -43,12 +43,12 @@ func UpdateGlobalConfigClientMode(client dynamodb.UpdateItemAPI, newClientMode t
 	}
 
 	//UpdateItem takes a key (pk/sk), item name --> match this to the column/struct tag, and interface to set
-	_, err = client.UpdateItem(pk, clientMode)
+	_, err := client.UpdateItem(pk, clientMode)
 	if err != nil {
-		log.Print(errors.Wrap(err, " setting global config failed"))
+		return fmt.Errorf("setting global config failed: %w", err)
 	}
 
-	return
+	return nil
 }
 
 func GetConfigurationUpdater(client dynamodb.UpdateItemAPI, fetcher ConcreteConfigurationFetcher, timeProvider clock.TimeProvider) ConcreteConfigurationUpdater {
@@ -65,9 +65,7 @@ func GetConfigurationUpdater(client dynamodb.UpdateItemAPI, fetcher ConcreteConf
 	}
 }
 
-//
 // ConfigurationUpdater is an interface to accept a new configuration and update either a global or machine configuration
-//
 type ConfigurationUpdater interface {
 	UpdateGlobalConfig(configRequest MachineConfigurationUpdateRequest) (MachineConfiguration, error)
 	UpdateMachineConfig(machineID string, configRequest MachineConfigurationUpdateRequest) (MachineConfiguration, error)
@@ -173,14 +171,14 @@ func (c ConcreteGlobalConfigurationUpdater) updateConfig(configRequest MachineCo
 
 	output, err := c.updater.UpdateItem(pk, newGlobalConfig)
 	if err != nil {
-		err = errors.Wrap(err, " updating global configuration failed")
+		err = fmt.Errorf("failed to update global configuration: %w", err)
 		return
 	}
 
 	err = attributevalue.UnmarshalMap(output.Attributes, &updatedConfig)
 
 	if err != nil {
-		err = errors.Wrap(err, "succeeded UpdateItem but failed to unmarshalMap into MachineConfiguration")
+		err = fmt.Errorf("succeeded UpdateItem but failed to unmarshalMap into MachineConfiguration: %w", err)
 		return
 	}
 
@@ -270,14 +268,14 @@ func (c ConcreteMachineConfigurationUpdater) updateConfig(machineID string, conf
 
 	output, err := c.updater.UpdateItem(pk, newMachineConfig)
 	if err != nil {
-		err = errors.Wrap(err, " updating machine configuration failed")
+		err = fmt.Errorf("updating machine configuration failed: %w", err)
 		return
 	}
 
 	err = attributevalue.UnmarshalMap(output.Attributes, &updatedConfig)
 
 	if err != nil {
-		err = errors.Wrap(err, "succeeded UpdateItem but failed to unmarshalMap into MachineConfiguration")
+		err = fmt.Errorf("succeeded UpdateItem but failed to unmarshalMap into MachineConfiguration: %w", err)
 		return
 	}
 

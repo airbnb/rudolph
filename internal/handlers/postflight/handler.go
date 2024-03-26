@@ -18,7 +18,6 @@ type PostPostflightHandler struct {
 	syncStateUpdater syncStateUpdater
 }
 
-//
 func (h *PostPostflightHandler) Boot() (err error) {
 	if h.booted {
 		return
@@ -42,23 +41,23 @@ func (h *PostPostflightHandler) Boot() (err error) {
 	return
 }
 
-//
 func (h *PostPostflightHandler) Handles(request events.APIGatewayProxyRequest) bool {
 	return request.Resource == "/postflight/{machine_id}" && request.HTTPMethod == "POST"
 }
 
-//
 func (h *PostPostflightHandler) Handle(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	machineID, ok := request.PathParameters["machine_id"]
-	if !ok {
-		// Unreachable code; API Gateway will never allow {machine_id} to be blank
-		log.Printf("ASSERTION FAILED: Received blank {machine_id}")
-		return response.APIResponse(http.StatusBadRequest, nil)
+	machineID, _, errResponse, err := parseRequest(request)
+	if errResponse != nil {
+		return errResponse, nil
+	}
+	if err != nil {
+		// Unreachable code; API Gateway should never encounter an error attempting to GetMachineID
+		return errResponse, err
 	}
 
 	// FIXME (derek.wang) This postflight is not properly setting the FeedSyncCursor; it's just setting it to
 	// like "10 minutes ago and leaving it like that. Pretty dumb, derek!"
-	err := h.syncStateUpdater.updatePostflightDate(machineID)
+	err = h.syncStateUpdater.updatePostflightDate(machineID)
 	if err != nil {
 		log.Printf("Failed to set final PostflightAt")
 		return response.APIResponse(http.StatusInternalServerError, err)

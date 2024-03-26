@@ -26,6 +26,7 @@ var (
 	machineID                 = "858CBF28-5EAA-58A3-A155-BA5E81D5B5DD"
 	expectedMachineClientMode = types.Lockdown
 	expectedGlobalClientMode  = types.Monitor
+	expectedGlobalSyncMode    = types.SyncTypeNormal
 
 	expectedMachineConfig = MachineConfiguration{
 		ClientMode:       expectedMachineClientMode,

@@ -1,12 +1,13 @@
 package machinerules
 
 import (
+	"errors"
+	"fmt"
 	"log"
 
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/model/globalrules"
 	"github.com/airbnb/rudolph/pkg/types"
-	"github.com/pkg/errors"
 )
 
 // @deprecated
@@ -21,17 +22,17 @@ func RemoveMachineRule(getter dynamodb.GetItemAPI, updater dynamodb.UpdateItemAP
 	)
 
 	if err != nil {
-		return errors.Wrap(err, "failed to retrieve existing rule")
+		return fmt.Errorf("failed to retrieve existing rule")
 	}
 	if rule == nil {
-		return errors.Wrap(err, "no such rule exists")
+		return errors.New("no such rule exists")
 	}
 
 	// First pull the associated global rule if any
 	globalRule, err := globalrules.GetGlobalRuleBySortKey(getter, ruleSortKey)
 
 	if err != nil {
-		return errors.Wrap(err, "something went wrong during pulling global rule")
+		return fmt.Errorf("something went wrong during pulling global rule")
 	}
 
 	var newPolicy types.Policy
@@ -60,7 +61,7 @@ func RemoveMachineRule(getter dynamodb.GetItemAPI, updater dynamodb.UpdateItemAP
 
 	_, err = updater.UpdateItem(rule.PrimaryKey, request)
 	if err != nil {
-		return errors.Wrap(err, "Something went wrong changing this rule to a remove rule")
+		return fmt.Errorf("something went wrong changing this rule to a remove rule: %w", err)
 	}
 
 	log.Printf("Successfully marked as 'remove'.")

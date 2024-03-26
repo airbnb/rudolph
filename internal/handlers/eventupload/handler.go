@@ -1,6 +1,7 @@
 package eventupload
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -24,7 +25,6 @@ type PostEventuploadHandler struct {
 	enableLambda bool
 }
 
-//
 func (h *PostEventuploadHandler) Boot() (err error) {
 	if h.booted {
 		return
@@ -58,14 +58,13 @@ func (h *PostEventuploadHandler) Boot() (err error) {
 	return
 }
 
-//
 func (h *PostEventuploadHandler) Handles(request events.APIGatewayProxyRequest) bool {
 	return request.Resource == "/eventupload/{machine_id}" && request.HTTPMethod == "POST"
 }
 
-//
 func (h *PostEventuploadHandler) Handle(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	log.Printf("EventUploadHandler request:\n%+v\n", request)
+	ctx := context.Background()
 
 	machineID, eventsRequest, errorResponse, err := parseRequest(request)
 	if errorResponse != nil || err != nil {
@@ -87,7 +86,7 @@ func (h *PostEventuploadHandler) Handle(request events.APIGatewayProxyRequest) (
 	}
 
 	if err == nil && h.enableLambda {
-		err = sendToLambda(h.lambdaClient, machineID, eventsRequest.Events)
+		err = sendToLambda(ctx, h.lambdaClient, machineID, eventsRequest.Events)
 	}
 
 	if err != nil {

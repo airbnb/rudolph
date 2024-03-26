@@ -35,8 +35,12 @@ func Test_GetSensorData(t *testing.T) {
 		osBuild              string
 		osVersion            string
 		santaVersion         string
+		clientMode           rudolphtypes.ClientMode
 		binaryRuleCount      int
 		certRuleCount        int
+		cdHashRuleCount      int
+		teamIDRuleCount      int
+		signingIDRuleCount   int
 		transitiveRuleCount  int
 		compilerRuleCount    int
 		ruleCount            int
@@ -56,13 +60,17 @@ func Test_GetSensorData(t *testing.T) {
 		osBuild:              "20A21",
 		osVersion:            "12.34",
 		santaVersion:         "2021.1",
+		clientMode:           rudolphtypes.Monitor,
 		serialNumber:         "123456789ABC",
 		requestCleanSync:     false,
 		binaryRuleCount:      4,
 		certRuleCount:        3,
+		cdHashRuleCount:      1,
+		teamIDRuleCount:      1,
+		signingIDRuleCount:   1,
 		transitiveRuleCount:  2,
 		compilerRuleCount:    1,
-		ruleCount:            10,
+		ruleCount:            12,
 		primaryUser:          "john_doe",
 		expectedTime:         clock.RFC3339(timeProvider.Now()),
 		expectedExpiresAfter: clock.Unixtimestamp(timeProvider.Now().UTC().AddDate(0, 0, 90)),
@@ -85,11 +93,16 @@ func Test_GetSensorData(t *testing.T) {
 							"SerialNum":            &awstypes.AttributeValueMemberS{Value: expected.serialNumber},
 							"OSVersion":            &awstypes.AttributeValueMemberS{Value: expected.osVersion},
 							"OSBuild":              &awstypes.AttributeValueMemberS{Value: expected.osBuild},
+							"SantaVersion":         &awstypes.AttributeValueMemberS{Value: expected.santaVersion},
+							"ClientMode":           &awstypes.AttributeValueMemberN{Value: fmt.Sprint(expected.clientMode)},
 							"RequestCleanSync":     &awstypes.AttributeValueMemberBOOL{Value: expected.requestCleanSync},
 							"PrimaryUser":          &awstypes.AttributeValueMemberS{Value: expected.primaryUser},
 							"RuleCount":            &awstypes.AttributeValueMemberN{Value: fmt.Sprint(expected.ruleCount)},
 							"CertificateRuleCount": &awstypes.AttributeValueMemberN{Value: fmt.Sprint(expected.certRuleCount)},
 							"BinaryRuleCount":      &awstypes.AttributeValueMemberN{Value: fmt.Sprint(expected.binaryRuleCount)},
+							"CDHashRuleCount":      &awstypes.AttributeValueMemberN{Value: fmt.Sprint(expected.cdHashRuleCount)},
+							"TeamIDRuleCount":      &awstypes.AttributeValueMemberN{Value: fmt.Sprint(expected.teamIDRuleCount)},
+							"SigningIDRuleCount":   &awstypes.AttributeValueMemberN{Value: fmt.Sprint(expected.signingIDRuleCount)},
 							"CompilerRuleCount":    &awstypes.AttributeValueMemberN{Value: fmt.Sprint(expected.compilerRuleCount)},
 							"TransitiveRuleCount":  &awstypes.AttributeValueMemberN{Value: fmt.Sprint(expected.transitiveRuleCount)},
 							"Time":                 &awstypes.AttributeValueMemberS{Value: expected.expectedTime},
@@ -113,8 +126,13 @@ func Test_GetSensorData(t *testing.T) {
 	assert.Equal(t, expected.requestCleanSync, sensorData.RequestCleanSync)
 	assert.Equal(t, expected.osBuild, sensorData.OSBuild)
 	assert.Equal(t, expected.osVersion, sensorData.OSVersion)
+	assert.Equal(t, expected.santaVersion, sensorData.SantaVersion)
+	assert.Equal(t, expected.clientMode, sensorData.ClientMode)
 	assert.Equal(t, expected.binaryRuleCount, sensorData.BinaryRuleCount)
 	assert.Equal(t, expected.certRuleCount, sensorData.CertificateRuleCount)
+	assert.Equal(t, expected.cdHashRuleCount, sensorData.CDHashRuleCount)
+	assert.Equal(t, expected.teamIDRuleCount, sensorData.TeamIDRuleCount)
+	assert.Equal(t, expected.signingIDRuleCount, sensorData.SigningIDRuleCount)
 	assert.Equal(t, expected.compilerRuleCount, sensorData.CompilerRuleCount)
 	assert.Equal(t, expected.transitiveRuleCount, sensorData.TransitiveRuleCount)
 	assert.Equal(t, expected.ruleCount, sensorData.RuleCount)

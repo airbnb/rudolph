@@ -1,11 +1,11 @@
 package syncstate
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/dynamodb"
-	"github.com/pkg/errors"
 )
 
 func UpdatePostflightDate(timeProvider clock.TimeProvider, client dynamodb.UpdateItemAPI, machineID string) (err error) {
@@ -43,8 +43,7 @@ func UpdatePostflightDate(timeProvider clock.TimeProvider, client dynamodb.Updat
 	)
 
 	if err != nil {
-		err = errors.Wrapf(err, "failed to update item")
-		return
+		return fmt.Errorf("failed to update item: %w", err)
 	}
 	return
 }
@@ -61,8 +60,7 @@ func UpdateRuledownloadStartedAt(timeProvider clock.TimeProvider, client dynamod
 	)
 
 	if err != nil {
-		err = errors.Wrapf(err, "failed to update item")
-		return
+		return fmt.Errorf("failed to update item: %w", err)
 	}
 	return
 }
@@ -79,8 +77,7 @@ func UpdateRuledownloadFinishedAt(timeProvider clock.TimeProvider, client dynamo
 	)
 
 	if err != nil {
-		err = errors.Wrapf(err, "failed to update item")
-		return
+		return fmt.Errorf("failed to update item: %w", err)
 	}
 	return
 }

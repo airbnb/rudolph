@@ -1,9 +1,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/pkg/errors"
 )
 
 // Policy represents the Santa Rule Policy.
@@ -52,7 +53,7 @@ func (p *Policy) UnmarshalText(text []byte) error {
 	case "ALLOWLIST_TRANSITIVE":
 		*p = RulePolicyAllowlistTransitive
 	default:
-		return errors.Errorf("unknown policy value %q", t)
+		return fmt.Errorf("unknown policy value %q", t)
 	}
 	return nil
 }
@@ -73,7 +74,7 @@ func (p Policy) MarshalText() ([]byte, error) {
 	case RulePolicyAllowlistTransitive:
 		return []byte("ALLOWLIST_TRANSITIVE"), nil
 	default:
-		return nil, errors.Errorf("unknown policy %d", p)
+		return nil, fmt.Errorf("unknown policy %d", p)
 	}
 }
 
@@ -94,7 +95,7 @@ func (p Policy) MarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) error
 	case RulePolicyAllowlistTransitive:
 		s = "6"
 	default:
-		return errors.Errorf("unknown policy value %q", p)
+		return fmt.Errorf("unknown policy value %q", p)
 	}
 	// av.S = &s
 	av.N = &s
@@ -129,7 +130,7 @@ func (p *Policy) UnmarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) er
 	case "ALLOWLIST_TRANSITIVE":
 		*p = RulePolicyAllowlistTransitive
 	default:
-		return errors.Errorf("unknown policy value %q", t)
+		return fmt.Errorf("unknown policy value %q", t)
 	}
 
 	return nil

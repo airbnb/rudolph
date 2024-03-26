@@ -16,7 +16,11 @@ resource "aws_api_gateway_model" "machine_config" {
     "batch_size": { "type": "number" },
     "enable_bundles": { "type": "boolean" },
     "enable_transitive_rules": { "type": "boolean" },
-    "clean_sync": { "type": "boolean" },
+    "full_sync_interval": { "type": "number" },
+    "upload_logs_url": { "type": "string" },
+    "block_usb_mount": { "type": "boolean" },
+    "remount_usb_mode": { "type": "string" },
+    "sync_type": { "type": "string" },
     "upload_logs_url": { "type": "string" }
   },
   "required": ["client_mode", "batch_size"]
@@ -85,7 +89,11 @@ resource "aws_api_gateway_model" "preflight_request" {
     "primary_user": { "type": "string" },
     "compiler_rule_count": { "type": "number" },
     "transitive_rule_count": { "type": "number" },
-    "request_clean_sync": { "type": "boolean" }
+    "cdhash_rule_count": { "type": "number" },
+    "teamid_rule_count": { "type": "number" },
+    "signingid_rule_count": { "type": "number" },
+    "request_clean_sync": { "type": "boolean" },
+    "model_identifier": { "type": "string" }
   },
   "required": ["santa_version", "serial_num", "primary_user"]
 }

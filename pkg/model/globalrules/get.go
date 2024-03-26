@@ -1,10 +1,11 @@
 package globalrules
 
 import (
+	"fmt"
+
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/types"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/pkg/errors"
 )
 
 func GetGlobalRuleBySortKey(client dynamodb.GetItemAPI, ruleSortKey string) (*GlobalRuleRow, error) {
@@ -37,7 +38,7 @@ func getItemAsGlobalRule(client dynamodb.GetItemAPI, partitionKey string, sortKe
 	err = attributevalue.UnmarshalMap(output.Item, &rule)
 
 	if err != nil {
-		err = errors.Wrap(err, "succeeded GetItem but failed to unmarshalMap into GlobalRuleRow")
+		err = fmt.Errorf("succeeded GetItem but failed to unmarshalMap into GlobalRuleRow: %w", err)
 		return
 	}
 

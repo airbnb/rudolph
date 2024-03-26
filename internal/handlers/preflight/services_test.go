@@ -27,8 +27,12 @@ func Test_concreteSensorDataSaver_OK(t *testing.T) {
 		osBuild              string
 		osVersion            string
 		santaVersion         string
+		clientMode           rudolphtypes.ClientMode
 		binaryRuleCount      int
 		certRuleCount        int
+		cdHashRuleCount      int
+		teamIDRuleCount      int
+		signingIDRuleCount   int
 		transitiveRuleCount  int
 		compilerRuleCount    int
 		ruleCount            int
@@ -49,12 +53,16 @@ func Test_concreteSensorDataSaver_OK(t *testing.T) {
 		osBuild:              "20A21",
 		osVersion:            "12.34",
 		santaVersion:         "2021.1",
+		clientMode:           rudolphtypes.Lockdown,
 		serialNumber:         "123456789ABC",
 		binaryRuleCount:      4,
 		certRuleCount:        3,
-		transitiveRuleCount:  2,
+		cdHashRuleCount:      1,
+		teamIDRuleCount:      1,
+		signingIDRuleCount:   1,
 		compilerRuleCount:    1,
-		ruleCount:            10,
+		transitiveRuleCount:  2,
+		ruleCount:            13,
 		primaryUser:          "john_doe",
 		expectedTime:         clock.RFC3339(timeProvider.Now()),
 		expectedExpiresAfter: clock.Unixtimestamp(timeProvider.Now().UTC().AddDate(0, 0, 90)),
@@ -68,19 +76,21 @@ func Test_concreteSensorDataSaver_OK(t *testing.T) {
 				assert.Equal(t, expected.machineID, sensorData.MachineID)
 				assert.Equal(t, expected.osBuild, sensorData.OSBuild)
 				assert.Equal(t, expected.osVersion, sensorData.OSVersion)
+				assert.Equal(t, expected.santaVersion, sensorData.SantaVersion)
 				assert.Equal(t, expected.binaryRuleCount, sensorData.BinaryRuleCount)
 				assert.Equal(t, expected.certRuleCount, sensorData.CertificateRuleCount)
+				assert.Equal(t, expected.cdHashRuleCount, sensorData.CDHashRuleCount)
+				assert.Equal(t, expected.teamIDRuleCount, sensorData.TeamIDRuleCount)
+				assert.Equal(t, expected.signingIDRuleCount, sensorData.SigningIDRuleCount)
 				assert.Equal(t, expected.compilerRuleCount, sensorData.CompilerRuleCount)
 				assert.Equal(t, expected.transitiveRuleCount, sensorData.TransitiveRuleCount)
 				assert.Equal(t, expected.ruleCount, sensorData.RuleCount)
 				assert.Equal(t, expected.primaryUser, sensorData.PrimaryUser)
 				assert.Equal(t, expected.serialNumber, sensorData.SerialNum)
 				assert.Equal(t, expected.expectedDataType, sensorData.DataType)
-				// assert.Equal(t, expected.santaVersion, sensorData.SantaVersion)
 				assert.Equal(t, pk, sensorData.PartitionKey)
 				assert.Equal(t, sk, sensorData.SortKey)
 				// assert.Equal(t, "osversion", sensorData.Hostname) // Missing??
-				// assert.Equal(t, types.Lockdown, sensorData.ClientMode) // missing??
 
 				return &awsdynamodb.PutItemOutput{}, nil
 			},
@@ -95,8 +105,11 @@ func Test_concreteSensorDataSaver_OK(t *testing.T) {
 		ClientMode:           rudolphtypes.Lockdown,
 		BinaryRuleCount:      expected.binaryRuleCount,
 		CertificateRuleCount: expected.certRuleCount,
-		TransitiveRuleCount:  expected.transitiveRuleCount,
+		CDHashRuleCount:      expected.cdHashRuleCount,
+		TeamIDRuleCount:      expected.teamIDRuleCount,
+		SigningIDRuleCount:   expected.signingIDRuleCount,
 		CompilerRuleCount:    expected.compilerRuleCount,
+		TransitiveRuleCount:  expected.transitiveRuleCount,
 		PrimaryUser:          expected.primaryUser,
 		SerialNumber:         expected.serialNumber,
 	}

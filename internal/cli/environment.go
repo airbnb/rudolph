@@ -1,16 +1,17 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 const (
-	deploymentEnvironmentsBaseDir = "deployments/environments"
+	deploymentEnvironmentsBaseDir        = "terraform/deployments"
+	deploymentEnvironmentsFoldersBaseDir = "terraform/environments"
 )
 
 type environmentConfiguration struct {
@@ -31,6 +32,7 @@ func fileExists(name string) bool {
 }
 
 func retrieveConfig(cmd *cobra.Command) (*environmentConfiguration, error) {
+	var tfConfigFileFound bool
 	p, err := cmd.Flags().GetString("ENV")
 	if err != nil {
 		return nil, err
@@ -47,17 +49,28 @@ func retrieveConfig(cmd *cobra.Command) (*environmentConfiguration, error) {
 	}
 
 	// Check to see if this is running under the git repo root source
-	tfConfigFileExists := fileExists(fmt.Sprintf(
+
+	if fileExists(fmt.Sprintf(
 		"%s/%s/config.auto.tfvars.json",
 		deploymentEnvironmentsBaseDir,
 		env,
-	))
+	)) {
+		tfConfigFileFound = true
+	}
+
+	if fileExists(fmt.Sprintf(
+		"%s/%s/config.auto.tfvars.json",
+		deploymentEnvironmentsFoldersBaseDir,
+		env,
+	)) {
+		tfConfigFileFound = true
+	}
 
 	v := viper.New()
 
 	// If running under the current git repo, use the TF config.auto.tfvars file
 	// Else use a configuration stored under the $HOME/.rudolph-cli or current working directory
-	if tfConfigFileExists {
+	if tfConfigFileFound {
 		v.SetConfigName("config.auto.tfvars")
 		v.SetConfigType("json")
 		v.AddConfigPath(fmt.Sprintf("%s/%s", deploymentEnvironmentsBaseDir, env))

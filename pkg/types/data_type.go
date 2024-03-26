@@ -1,10 +1,11 @@
 package types
 
 import (
+	"fmt"
+
 	awstypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/pkg/errors"
 )
 
 // DataType identifies the current DynamoDB data model
@@ -42,7 +43,7 @@ func (dt *DataType) UnmarshalText(text []byte) error {
 	case "GLOBALCONFIG":
 		*dt = DataTypeGlobalConfig
 	default:
-		return errors.Errorf("unknown data_type value %q", mode)
+		return fmt.Errorf("unknown data_type value %q", mode)
 	}
 	return nil
 }
@@ -61,7 +62,7 @@ func (dt DataType) MarshalText() ([]byte, error) {
 	case DataTypeRulesFeed:
 		return []byte("RULESFEED"), nil
 	default:
-		return nil, errors.Errorf("unknown data_type %s", dt)
+		return nil, fmt.Errorf("unknown data_type %s", dt)
 	}
 }
 
@@ -80,7 +81,7 @@ func (dt DataType) MarshalDynamoDBAttributeValue() (awstypes.AttributeValue, err
 	case DataTypeRulesFeed:
 		s = "RulesFeed"
 	default:
-		return nil, errors.Errorf("unknown data_type value %q", dt)
+		return nil, fmt.Errorf("unknown data_type value %q", dt)
 	}
 	return &awstypes.AttributeValueMemberS{Value: s}, nil
 }
@@ -105,7 +106,7 @@ func (dt *DataType) UnmarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue)
 	case "MACHINE_CONFIG":
 		*dt = DataTypeMachineConfig
 	default:
-		return errors.Errorf("unknown data_type value %q", t)
+		return fmt.Errorf("unknown data_type value %q", t)
 	}
 	return nil
 }

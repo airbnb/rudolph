@@ -1,6 +1,7 @@
 package preflight
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -10,7 +11,6 @@ import (
 	apiRequest "github.com/airbnb/rudolph/pkg/request"
 	"github.com/airbnb/rudolph/pkg/response"
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/pkg/errors"
 )
 
 type PostPreflightHandler struct {
@@ -22,7 +22,6 @@ type PostPreflightHandler struct {
 	timeProvider                clock.TimeProvider
 }
 
-//
 func (h *PostPreflightHandler) Boot() (err error) {
 	if h.booted {
 		return
@@ -43,12 +42,10 @@ func (h *PostPreflightHandler) Boot() (err error) {
 	return
 }
 
-//
 func (h *PostPreflightHandler) Handles(request events.APIGatewayProxyRequest) bool {
 	return request.Resource == "/preflight/{machine_id}" && request.HTTPMethod == "POST"
 }
 
-//
 func (h *PostPreflightHandler) Handle(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	// Get machineID from req.PathParameter of "machine_id" and it must be a valid UUID
 	machineID, errResponse, err := apiRequest.GetMachineID(request)
@@ -97,13 +94,13 @@ func (h *PostPreflightHandler) handlePreflight(machineID string, preflightReques
 	}
 
 	// Determine if a Clean sync should be performed based on the preflight request
-	// if the machine needs a perodic refresh
+	// if the machine needs a periodic refresh
 	// or if the machine is new
 	switch preflightRequest.RequestCleanSync {
 	case true:
 		performCleanSync = true
 	case false:
-		// Retreive the current feed sync cursor
+		// Retrieve the current feed sync cursor
 		feedSyncCursor, performCleanSync = h.stateTrackingService.getFeedSyncStateCursor(prevSyncState)
 		// If a clean sync should be forced, break out and do it now
 		if performCleanSync {
@@ -143,15 +140,12 @@ func (h *PostPreflightHandler) handlePreflight(machineID string, preflightReques
 	)
 
 	if err != nil {
-		err = errors.Wrapf(err, "Encountered error trying to save new sync state")
+		err = fmt.Errorf("encountered error trying to save new sync state: %w", err)
 		return response.APIResponse(http.StatusInternalServerError, err)
 	}
 
 	// Construct the response
 	preflightResponse := ConstructPreflightResponse(machineConfiguration, performCleanSync)
-	if err != nil {
-		return response.APIResponse(http.StatusInternalServerError, err)
-	}
 
 	return response.APIResponse(http.StatusOK, preflightResponse)
 }

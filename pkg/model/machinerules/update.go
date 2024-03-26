@@ -1,11 +1,11 @@
 package machinerules
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/types"
-	"github.com/pkg/errors"
 )
 
 // @deprecated
@@ -25,7 +25,7 @@ func UpdateMachineRule(client dynamodb.UpdateItemAPI, machineID string, sha256 s
 	)
 
 	if err != nil {
-		err = errors.Wrapf(err, "failed to update machine rule")
+		err = fmt.Errorf("failed to update machine rule: %w", err)
 		return
 	}
 

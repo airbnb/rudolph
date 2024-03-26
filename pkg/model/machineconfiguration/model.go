@@ -8,11 +8,15 @@ import (
 )
 
 const (
-	machineConfigurationPKPrefix = "Machine#"
-	globalConfigurationPK        = "GlobalConfig"
-	currentSK                    = "Config"
-	allowGlobalLockdown          = false
-	DefaultFullSyncInterval      = 600
+	machineConfigurationPKPrefix        = "Machine#"
+	globalConfigurationPK               = "GlobalConfig"
+	currentSK                           = "Config"
+	allowGlobalLockdown                 = false
+	DefaultFullSyncInterval             = 600
+	DefaultSyncTypeNormal        string = SyncTypeNormal
+	SyncTypeNormal               string = "normal"
+	SyncTypeClean                string = "clean"
+	SyncTypeCleanAll             string = "clean_all"
 )
 
 // MachineConfigurationRow is an encapsulation of a DynamoDB row containing machine configuration data
@@ -34,7 +38,11 @@ type MachineConfiguration struct {
 	CleanSync              bool             `dynamodbav:"CleanSync,omitempty"`
 	FullSyncInterval       int              `dynamodbav:"FullSyncInterval,omitempty"`
 	UploadLogsURL          string           `dynamodbav:"UploadLogsUrl,omitempty"`
-	DataType               types.DataType   `dynamodbav:"DataType,omitempty"`
+	BlockUsbMount          bool             `dynamodbav:"BlockUsbMount,omitempty"`
+	RemountUsbMode         string           `dynamodbav:"RemountUsbMode,omitempty"`
+	// SyncType                 types.SyncType   `dynamodbav:"SyncType,omitempty"`
+	OverrideFileAccessAction string         `dynamodbav:"OverrideFileAccessAction,omitempty"`
+	DataType                 types.DataType `dynamodbav:"DataType,omitempty"`
 }
 
 type MachineConfigurationUpdateRequest struct {
@@ -46,7 +54,11 @@ type MachineConfigurationUpdateRequest struct {
 	EnableTransitiveRules *bool
 	CleanSync             *bool
 	FullSyncInterval      *int
-	UploadLogsURL         *string
+	BlockUsbMount         *bool
+	RemountUsbMode        *string
+	// SyncType                 *types.SyncType
+	OverrideFileAccessAction *string
+	UploadLogsURL            *string
 }
 
 // Fragments for updates
@@ -74,6 +86,10 @@ func GetUniversalDefaultConfig() MachineConfiguration {
 		CleanSync:              false,
 		FullSyncInterval:       DefaultFullSyncInterval,
 		UploadLogsURL:          "",
-		DataType:               types.DataTypeGlobalConfig,
+		BlockUsbMount:          false,
+		RemountUsbMode:         "",
+		// SyncType:                 types.SyncTypeNormal,
+		OverrideFileAccessAction: "",
+		DataType:                 types.DataTypeGlobalConfig,
 	}
 }

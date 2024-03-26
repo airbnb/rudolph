@@ -1,13 +1,14 @@
 package rule
 
 import (
+	"fmt"
+
 	"github.com/airbnb/rudolph/internal/cli/flags"
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/model/globalrules"
 	"github.com/airbnb/rudolph/pkg/model/machinerules"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -49,7 +50,7 @@ func removeRule(globalRemover globalrules.RuleRemovalService, machineRuleRemover
 	if !tf.IsGlobal {
 		machineID, err := tf.GetMachineID()
 		if err != nil {
-			return errors.Wrap(err, "Failed to get MachineID!")
+			return fmt.Errorf("failed to get MachineID: %v", err)
 		}
 		return machineRuleRemover.RemoveMachineRule(machineID, ruleName)
 	}

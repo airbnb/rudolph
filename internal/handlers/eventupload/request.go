@@ -36,12 +36,6 @@ func parseRequest(request events.APIGatewayProxyRequest) (machineID string, pars
 		return
 	}
 
-	err = json.Unmarshal([]byte(request.Body), &parsedRequest)
-	if err != nil {
-		errorResponse, err = response.APIResponse(http.StatusBadRequest, response.ErrInvalidBodyResponse)
-		return
-	}
-
 	// Parse the request
 	err = json.Unmarshal([]byte(request.Body), &parsedRequest)
 	if err != nil {
@@ -65,6 +59,10 @@ type EventUploadEvent struct {
 	QuarantineTimestamp          int            `json:"quarantine_timestamp"`
 	LoggedInUsers                []string       `json:"logged_in_users"`
 	SigningChain                 []SigningEntry `json:"signing_chain"`
+	SigningIDs                   string         `json:"signing_id"`
+	TeamID                       string         `json:"team_id"`
+	BundleID                     string         `json:"bundle_id"`
+	CDHash                       string         `json:"cdhash"`
 	ParentProcessID              int            `json:"ppid"`
 	ExecutingUser                string         `json:"executing_user"`
 	FileName                     string         `json:"file_name"`
@@ -72,7 +70,7 @@ type EventUploadEvent struct {
 	FileSHA256                   string         `json:"file_sha256"`
 	Decision                     string         `json:"decision"`
 	ProcessID                    int            `json:"pid"`
-	CurrentSesssions             []string       `json:"current_sessions"`
+	CurrentSessions              []string       `json:"current_sessions"`
 	FileBundleID                 string         `json:"file_bundle_id,omitempty"`
 	FileBundlePath               string         `json:"file_bundle_path,omitempty"`
 	FileBundleExecutableRelPath  string         `json:"file_bundle_executable_rel_path,omitempty"`

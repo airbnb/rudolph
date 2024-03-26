@@ -3,7 +3,6 @@ package rules
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/airbnb/rudolph/internal/cli/flags"
@@ -55,7 +54,7 @@ func rules(client dynamodb.QueryAPI, tf flags.TargetFlags, limit int) error {
 
 		rules, lastEvaluatedKey, err := globalrules.GetPaginatedGlobalRules(client, limit, nil)
 		if err != nil {
-			return errors.Wrapf(err, "Failed to get rules")
+			return fmt.Errorf("failed to get rules: %w", err)
 		}
 
 		ruleCount := len(*rules)
@@ -75,7 +74,7 @@ func rules(client dynamodb.QueryAPI, tf flags.TargetFlags, limit int) error {
 		fmt.Printf("Retrieving for ")
 		machineID, err = tf.GetMachineID()
 		if err != nil {
-			return errors.Wrapf(err, "failed to get machineID")
+			return fmt.Errorf("failed to get machineID: %w", err)
 		}
 
 		if tf.IsTargetSelf() {
@@ -87,7 +86,7 @@ func rules(client dynamodb.QueryAPI, tf flags.TargetFlags, limit int) error {
 
 		rules, err := machinerules.GetMachineRules(client, machineID)
 		if err != nil {
-			return errors.Wrapf(err, "failed to GetMachineRules")
+			return fmt.Errorf("failed to GetMachineRules: %w", err)
 		}
 
 		fmt.Printf("Retrieved %d MachineRules:\n", len(*rules))

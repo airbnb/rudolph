@@ -14,6 +14,7 @@ LINUX_BUILD_DIR_AUTHORIZER=$LINUX_BUILD_DIR/authorizer
 MACOS_BUILD_DIR=$BUILD_DIR/macos
 APPS_DIR=$DIR/cmd
 CLI_NAME=rudolph
+CLI_BUILD_DIR=$BUILD_DIR/cli
 PKG_DIR=$BUILD_DIR/package
 API_DEPLOYMENT_ZIP_PATH=$PKG_DIR/api_deployment.zip
 API_AUTHORIZER_DEPLOYMENT_ZIP_PATH=$PKG_DIR/api_authorizer_deployment.zip
@@ -33,11 +34,15 @@ echo "  compiling authorizer in linux:arm64..."
 GOOS=linux GOARCH=arm64 go build -o $LINUX_BUILD_DIR_AUTHORIZER/bootstrap $APPS_DIR/authorizer
 
 if [ "$(uname)" == "Darwin" ]; then
-    echo "  compiling cli..."
+    echo "  compiling cross-compatible macOS cli..."
     GOOS=darwin GOARCH=amd64 go build -o $MACOS_BUILD_DIR/cli_amd64 $APPS_DIR/cli
     GOOS=darwin GOARCH=arm64 go build -o $MACOS_BUILD_DIR/cli_arm64 $APPS_DIR/cli
     lipo -create -output $MACOS_BUILD_DIR/cli $MACOS_BUILD_DIR/cli_amd64 $MACOS_BUILD_DIR/cli_arm64
     ln -sf $MACOS_BUILD_DIR/cli $DIR/$CLI_NAME
+else
+    echo "  compiling cli..."
+    go build -o $CLI_BUILD_DIR/cli $APPS_DIR/cli
+    ln -sf $CLI_BUILD_DIR/cli $DIR/$CLI_NAME
 fi
 
 echo "*** packaging... ***"
@@ -51,8 +56,11 @@ cd $LINUX_BUILD_DIR_AUTHORIZER; zip -r $API_AUTHORIZER_DEPLOYMENT_ZIP_PATH *
 echo "*** complete ***"
 
 echo "  created:"
-echo "    $API_DEPLOYMENT_ZIP_PATH"
-echo "    $API_AUTHORIZER_DEPLOYMENT_ZIP_PATH"
+echo "    API: $API_DEPLOYMENT_ZIP_PATH"
+echo "    API Authorizer: $API_AUTHORIZER_DEPLOYMENT_ZIP_PATH"
 if [ "$(uname)" == "Darwin" ]; then
-    echo "    $MACOS_BUILD_DIR/cli"
+    echo "    generated cross-compiled macOS cli"
+    echo "    CLI: $MACOS_BUILD_DIR/cli"
+else
+    echo "    CLI: $CLI_BUILD_DIR/cli"
 fi

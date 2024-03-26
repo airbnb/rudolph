@@ -1,12 +1,12 @@
 package machineconfiguration
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/pkg/errors"
 )
 
 func GetConfigurationFetcher(client dynamodb.GetItemAPI, timeProvider clock.TimeProvider) ConcreteConfigurationFetcher {
@@ -58,14 +58,14 @@ type ConcreteConfigurationFetcher struct {
 func (f ConcreteConfigurationFetcher) getIntendedConfig(machineID string) (intendedConfig MachineConfiguration, err error) {
 	config, err := f.machine.GetMachineSpecificConfig(machineID)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to get machine config")
+		err = fmt.Errorf("failed to get machine config: %w", err)
 		return
 	}
 
 	if config == nil {
 		config, err = f.global.GetGlobalConfig()
 		if err != nil {
-			err = errors.Wrapf(err, "failed to get fallback global config")
+			err = fmt.Errorf("failed to get fallback global config: %w", err)
 			return
 		}
 	}
@@ -86,7 +86,7 @@ func (f ConcreteConfigurationFetcher) getIntendedConfig(machineID string) (inten
 func (f ConcreteConfigurationFetcher) getIntendedGlobalConfig() (intendedConfig MachineConfiguration, isDefaultConfig bool, err error) {
 	config, err := f.global.GetGlobalConfig()
 	if err != nil {
-		err = errors.Wrapf(err, "failed to get fallback global config")
+		err = fmt.Errorf("failed to get fallback global config: %w", err)
 		return
 	}
 
@@ -148,7 +148,7 @@ func (c CachedConcreteGlobalConfigurationFetcher) GetGlobalConfig() (config *Mac
 		machineConfigurationSK(),
 	)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to get global config")
+		err = fmt.Errorf("failed to get global config: %w", err)
 		return
 	}
 
@@ -166,7 +166,7 @@ func (c UncachedConcreteGlobalConfigurationFetcher) GetGlobalConfig() (config *M
 		machineConfigurationSK(),
 	)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to get global config")
+		err = fmt.Errorf("failed to get global config: %w", err)
 		return
 	}
 	return
@@ -226,7 +226,7 @@ func (p ConcreteUniversalConfigurationProvider) GetUniversalDefaultConfig() Mach
 func GetIntendedConfig(client dynamodb.GetItemAPI, machineID string) (intendedConfig MachineConfiguration, err error) {
 	config, err := GetMachineSpecificConfig(client, machineID)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to get machine config")
+		err = fmt.Errorf("failed to get machine config: %w", err)
 		return
 	}
 
@@ -236,7 +236,7 @@ func GetIntendedConfig(client dynamodb.GetItemAPI, machineID string) (intendedCo
 
 		config, err = GetGlobalConfig(client)
 		if err != nil {
-			err = errors.Wrapf(err, "failed to get global config")
+			err = fmt.Errorf("failed to get global config: %w", err)
 			return
 		}
 	}
@@ -291,7 +291,7 @@ func getItemAsMachineConfiguration(client dynamodb.GetItemAPI, partitionKey stri
 	err = attributevalue.UnmarshalMap(output.Item, &config)
 
 	if err != nil {
-		err = errors.Wrap(err, "succeeded GetItem but failed to unmarshalMap into MachineConfiguration")
+		err = fmt.Errorf("succeeded GetItem but failed to unmarshalMap into MachineConfiguration: %w", err)
 		return
 	}
 

@@ -18,20 +18,25 @@ const (
 // SensorData encapsulation for a DDB row encapsulating data that is uploaded in preflight
 type SensorData struct {
 	dynamodb.PrimaryKey
-	MachineID            string         `dynamodbav:"MachineID"`
-	SerialNum            string         `dynamodbav:"SerialNum"`
-	OSVersion            string         `dynamodbav:"OSVersion"`
-	OSBuild              string         `dynamodbav:"OSBuild"`
-	RequestCleanSync     bool           `dynamodbav:"RequestCleanSync"`
-	PrimaryUser          string         `dynamodbav:"PrimaryUser"`
-	RuleCount            int            `dynamodbav:"RuleCount"`
-	CertificateRuleCount int            `dynamodbav:"CertificateRuleCount"`
-	BinaryRuleCount      int            `dynamodbav:"BinaryRuleCount"`
-	CompilerRuleCount    int            `dynamodbav:"CompilerRuleCount"`
-	TransitiveRuleCount  int            `dynamodbav:"TransitiveRuleCount"`
-	Time                 string         `dynamodbav:"Time"`
-	ExpiresAfter         int64          `dynamodbav:"ExpiresAfter,omitempty"`
-	DataType             types.DataType `dynamodbav:"DataType"`
+	MachineID            string           `dynamodbav:"MachineID"`
+	SerialNum            string           `dynamodbav:"SerialNum"`
+	OSVersion            string           `dynamodbav:"OSVersion"`
+	OSBuild              string           `dynamodbav:"OSBuild"`
+	SantaVersion         string           `dynamodbav:"SantaVersion"`
+	ClientMode           types.ClientMode `dynamodbav:"ClientMode"`
+	RequestCleanSync     bool             `dynamodbav:"RequestCleanSync"`
+	PrimaryUser          string           `dynamodbav:"PrimaryUser"`
+	RuleCount            int              `dynamodbav:"RuleCount"`
+	CertificateRuleCount int              `dynamodbav:"CertificateRuleCount"`
+	BinaryRuleCount      int              `dynamodbav:"BinaryRuleCount"`
+	CDHashRuleCount      int              `dynamodbav:"CDHashRuleCount"`
+	TeamIDRuleCount      int              `dynamodbav:"TeamIDRuleCount"`
+	SigningIDRuleCount   int              `dynamodbav:"SigningIDRuleCount"`
+	CompilerRuleCount    int              `dynamodbav:"CompilerRuleCount"`
+	TransitiveRuleCount  int              `dynamodbav:"TransitiveRuleCount"`
+	Time                 string           `dynamodbav:"Time"`
+	ExpiresAfter         int64            `dynamodbav:"ExpiresAfter,omitempty"`
+	DataType             types.DataType   `dynamodbav:"DataType"`
 }
 
 // MachineIDSensorDataPKSK returns the partition and sort keys for a machine id
