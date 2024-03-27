@@ -43,7 +43,7 @@ resource "aws_lambda_alias" "api_handler" {
   name             = var.alias_name
   description      = "${var.alias_name} alias for ${aws_lambda_function.api_handler.function_name}"
   function_name    = aws_lambda_function.api_handler.function_name
-  function_version = aws_lambda_function.api_handler.version
+  function_version = "$LATEST"
 }
 
 
