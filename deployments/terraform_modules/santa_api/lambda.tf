@@ -144,6 +144,7 @@ module "postflight_function" {
   lambda_source_key         = aws_s3_bucket_object.santa_api_source.key
   lambda_source_hash        = local.lambda_source_hash
   endpoint                  = "postflight"
+  lambda_memory_size        = 512
   api_gateway_execution_arn = aws_api_gateway_rest_api.api_gateway.execution_arn
 
   env_vars = {
