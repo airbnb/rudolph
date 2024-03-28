@@ -60,6 +60,8 @@ resource "aws_s3_bucket_ownership_controls" "s3_logging" {
 }
 
 resource "aws_s3_bucket_acl" "s3_logging" {
+  count = local.create_s3_logging_bucket ? 1 : 0
+  
   depends_on = [aws_s3_bucket_ownership_controls.s3_logging]
 
   bucket = aws_s3_bucket.s3_logging[0].id
