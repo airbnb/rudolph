@@ -42,7 +42,6 @@ if [ "$(uname)" == "Darwin" ]; then
 else
     echo "  compiling cli..."
     go build -o $CLI_BUILD_DIR/cli $APPS_DIR/cli
-    ln -sf $CLI_BUILD_DIR/cli $DIR/$CLI_NAME
 fi
 
 echo "*** packaging... ***"
