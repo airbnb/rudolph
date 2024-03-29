@@ -15,11 +15,19 @@ import (
 // GetPaginatedFeedRules returns zero or more rules on the feed, up to the limit
 // If there are more rules to paginate through, will return a lastEvaluatedKey that can be passed in as the
 // exclusiveStartKey in subsequent requests. Otherwise, lastEvaluatedKey is nil when there are no more items.
-func GetPaginatedFeedRules(client dynamodb.QueryAPI, limit int, exclusiveStartKey *dynamodb.PrimaryKey) (items *[]FeedRuleRow, lastEvaluatedKey *dynamodb.PrimaryKey, err error) {
+func GetPaginatedFeedRules(
+	client dynamodb.QueryAPI,
+	limit int,
+	exclusiveStartKey *dynamodb.PrimaryKey,
+) (
+	items *[]FeedRuleRow,
+	lastEvaluatedKey *dynamodb.PrimaryKey,
+	err error,
+) {
 	partitionKey := feedRulesPK
 
 	if limit <= 0 {
-		err = errors.New("Invalid limit/batchsize specified")
+		err = errors.New("invalid limit/batchsize specified")
 		return
 	}
 
@@ -67,5 +75,12 @@ func GetPaginatedFeedRules(client dynamodb.QueryAPI, limit int, exclusiveStartKe
 		return
 	}
 	// log.Printf("    got %d items from query.", len(*items))
+
+	// To support legacy SHA256 types, we must transform the datasets before returning
+	for _, item := range *items {
+		if item.SHA256 != "" && item.Identifier == "" {
+			item.Identifier = item.SHA256
+		}
+	}
 	return
 }

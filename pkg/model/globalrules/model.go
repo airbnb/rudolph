@@ -20,6 +20,6 @@ type updateRulePolicyRequest struct {
 	Policy types.Policy `dynamodbav:"Policy"`
 }
 
-func globalRulesSK(sha256 string, ruleType types.RuleType) string {
-	return rules.RuleSortKeyFromTypeSHA(sha256, ruleType)
+func globalRulesSK(identifier string, ruleType types.RuleType) string {
+	return rules.RuleSortKeyFromTypeIdentifier(identifier, ruleType)
 }

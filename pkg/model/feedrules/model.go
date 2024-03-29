@@ -1,6 +1,8 @@
 package feedrules
 
 import (
+	"fmt"
+
 	"github.com/airbnb/rudolph/pkg/clock"
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/airbnb/rudolph/pkg/model/rules"
@@ -25,4 +27,16 @@ func GetSyncStateExpiresAfter(timeProvider clock.TimeProvider) int64 {
 
 func GetDataType() types.DataType {
 	return types.DataTypeRulesFeed
+}
+
+func feedRulesSK(
+	timeProvider clock.TimeProvider,
+	identifier string,
+	ruleType types.RuleType,
+) string {
+	return fmt.Sprintf(
+		"%s#%s",
+		clock.RFC3339(timeProvider.Now()),
+		rules.RuleSortKeyFromTypeIdentifier(identifier, ruleType),
+	)
 }

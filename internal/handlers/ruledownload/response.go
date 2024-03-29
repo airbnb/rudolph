@@ -18,7 +18,8 @@ type RuledownloadResponse struct {
 type RuledownloadRule struct {
 	RuleType      types.RuleType `json:"rule_type"`
 	Policy        types.Policy   `json:"policy"`
-	SHA256        string         `json:"sha256"`
+	SHA256        string         `json:"sha256,omitempty"`
+	Identifier    string         `json:"identifier"`
 	CustomMessage string         `json:"custom_msg,omitempty"`
 }
 
@@ -28,7 +29,12 @@ func DDBRulesToResponseRules(rulesList []rules.SantaRule) (responseRules []Ruled
 	responseRules = make([]RuledownloadRule, len(rulesList))
 
 	for i, rule := range rulesList {
-		responseRules[i] = RuledownloadRule(rule)
+		responseRules[i] = RuledownloadRule{
+			RuleType:      rule.RuleType,
+			Policy:        rule.Policy,
+			Identifier:    rule.Identifier,
+			CustomMessage: rule.CustomMessage,
+		}
 	}
 	return
 }

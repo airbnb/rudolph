@@ -9,9 +9,24 @@ import (
 	"github.com/airbnb/rudolph/pkg/types"
 )
 
-func AddNewMachineRule(client dynamodb.PutItemAPI, machineID string, sha256 string, ruleType types.RuleType, policy types.Policy, description string, expires time.Time) (err error) {
+func AddNewMachineRule(
+	client dynamodb.PutItemAPI,
+	machineID string,
+	identifier string,
+	ruleType types.RuleType,
+	policy types.Policy,
+	description string,
+	expires time.Time,
+) error {
 	// Input Validation
-	isValid, err := inputValidation(machineID, sha256, ruleType, policy, description, expires)
+	isValid, err := ruleValidation(
+		machineID,
+		identifier,
+		ruleType,
+		policy,
+		description,
+		expires,
+	)
 	if err != nil {
 		return err
 	}
@@ -22,32 +37,34 @@ func AddNewMachineRule(client dynamodb.PutItemAPI, machineID string, sha256 stri
 	rule := MachineRuleRow{
 		PrimaryKey: dynamodb.PrimaryKey{
 			PartitionKey: machineRulePK(machineID),
-			SortKey:      machineRuleSK(sha256, ruleType),
+			SortKey:      machineRuleSK(identifier, ruleType),
 		},
 		Description: description,
 		SantaRule: rules.SantaRule{
-			RuleType: ruleType,
-			Policy:   policy,
-			SHA256:   sha256,
+			RuleType:   ruleType,
+			Policy:     policy,
+			Identifier: identifier,
 		},
 		ExpiresAfter: expires.Unix(),
 	}
 
 	_, err = client.PutItem(rule)
-	return
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func inputValidation(machineID, sha256 string, ruleType types.RuleType, policy types.Policy, description string, expires time.Time) (bool, error) {
-	var err error
-
+func ruleValidation(
+	machineID,
+	identifier string,
+	ruleType types.RuleType,
+	policy types.Policy,
+	description string,
+	expires time.Time,
+) (bool, error) {
 	// MachineID validation
-	err = types.ValidateMachineID(machineID)
-	if err != nil {
-		return false, err
-	}
-
-	// RuleSha256 validation
-	err = types.ValidateSha256(sha256)
+	err := types.ValidateMachineID(machineID)
 	if err != nil {
 		return false, err
 	}

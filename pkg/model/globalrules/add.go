@@ -11,9 +11,16 @@ import (
 	awsdynamodbtypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-func AddNewGlobalRule(time clock.TimeProvider, client dynamodb.TransactWriteItemsAPI, sha256 string, ruleType types.RuleType, policy types.Policy, description string) error {
+func AddNewGlobalRule(
+	time clock.TimeProvider,
+	client dynamodb.TransactWriteItemsAPI,
+	identifier string,
+	ruleType types.RuleType,
+	policy types.Policy,
+	description string,
+) error {
 	// Input Validation
-	isValid, err := inputValidation(sha256, ruleType, policy, description)
+	isValid, err := ruleValidation(ruleType, policy)
 	if err != nil {
 		return err
 	}
@@ -24,13 +31,13 @@ func AddNewGlobalRule(time clock.TimeProvider, client dynamodb.TransactWriteItem
 	rule := GlobalRuleRow{
 		PrimaryKey: dynamodb.PrimaryKey{
 			PartitionKey: globalRulesPK,
-			SortKey:      globalRulesSK(sha256, ruleType),
+			SortKey:      globalRulesSK(identifier, ruleType),
 		},
 		Description: description,
 		SantaRule: rules.SantaRule{
-			RuleType: ruleType,
-			Policy:   policy,
-			SHA256:   sha256,
+			RuleType:   ruleType,
+			Policy:     policy,
+			Identifier: identifier,
 		},
 	}
 
@@ -54,17 +61,12 @@ func AddNewGlobalRule(time clock.TimeProvider, client dynamodb.TransactWriteItem
 	return err
 }
 
-func inputValidation(sha256 string, ruleType types.RuleType, policy types.Policy, description string) (bool, error) {
-	var err error
-
-	// RuleSha256 validation
-	err = types.ValidateSha256(sha256)
-	if err != nil {
-		return false, err
-	}
-
+func ruleValidation(
+	ruleType types.RuleType,
+	policy types.Policy,
+) (bool, error) {
 	// RuleType validation
-	_, err = ruleType.MarshalText()
+	_, err := ruleType.MarshalText()
 	if err != nil {
 		return false, err
 	}
