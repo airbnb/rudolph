@@ -3,7 +3,7 @@ package rules
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -57,7 +57,7 @@ func runExport(
 type fileRule struct {
 	RuleType      types.RuleType `json:"type"`
 	Policy        types.Policy   `json:"policy"`
-	SHA256        string         `json:"sha256"`
+	Identifier    string         `json:"identifier"`
 	CustomMessage string         `json:"custom_msg,omitempty"`
 	Description   string         `json:"description"`
 }
@@ -67,7 +67,7 @@ func runJsonExport(client dynamodb.QueryAPI, filename string) (err error) {
 	fmt.Println("Querying rules from DynamoDB...")
 	total, err := getRules(client, func(rule globalrules.GlobalRuleRow) (err error) {
 		jsonRules = append(jsonRules, fileRule{
-			SHA256:        rule.SHA256,
+			Identifier:    rule.Identifier,
 			RuleType:      rule.RuleType,
 			Policy:        rule.Policy,
 			CustomMessage: rule.CustomMessage,
@@ -83,7 +83,7 @@ func runJsonExport(client dynamodb.QueryAPI, filename string) (err error) {
 	if err != nil {
 		return
 	}
-	err = ioutil.WriteFile(filename, jsondata, 0644)
+	err = os.WriteFile(filename, jsondata, 0644)
 	if err != nil {
 		return
 	}
@@ -124,7 +124,7 @@ func runCsvExport(
 			return
 		}
 		record := []string{
-			rule.SHA256,
+			rule.Identifier,
 			string(ruleType),
 			string(policy),
 			rule.CustomMessage,

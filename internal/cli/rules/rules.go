@@ -108,6 +108,10 @@ func renderRule(item modelrules.SantaRule) string {
 		predicate = "binary"
 	case types.RuleTypeCertificate:
 		predicate = "certificate"
+	case types.RuleTypeTeamID:
+		predicate = "teamID"
+	case types.RuleTypeSigningID:
+		predicate = "signingID"
 	default:
 		predicate = "?"
 	}
@@ -130,5 +134,10 @@ func renderRule(item modelrules.SantaRule) string {
 		verb = "?"
 	}
 
-	return fmt.Sprintf("Rule %v %v (%s)", verb, predicate, item.SHA256)
+	// Support backwards compatibility with SHA256
+	if item.SHA256 != "" && item.Identifier == "" {
+		item.Identifier = item.SHA256
+	}
+
+	return fmt.Sprintf("Rule %v %v (%s)", verb, predicate, item.Identifier)
 }

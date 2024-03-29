@@ -2,18 +2,18 @@ package flags
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/airbnb/rudolph/pkg/types"
 )
 
 const (
-	binType           = "binary"
-	binTypeShort      = "bin"
-	certType          = "certificate"
-	certTypeShort     = "cert"
-	monitorMode       = "monitor"
-	lockdownMode      = "lockdown"
-	defaultClientMode = "monitor"
+	binType       = "binary"
+	binTypeShort  = "bin"
+	certType      = "certificate"
+	certTypeShort = "cert"
+	teamIDType    = "teamid"
+	signingIDType = "signingid"
 )
 
 // ruleType is a custom type for use as a CLI flag representing the type of rule being applied
@@ -34,11 +34,15 @@ func (i *RuleType) AsRuleType() types.RuleType {
 }
 
 func (i *RuleType) Set(s string) error {
-	switch s {
+	switch strings.ToLower(s) {
 	case binType, binTypeShort:
 		*i = RuleType(types.RuleTypeBinary)
 	case certType, certTypeShort:
 		*i = RuleType(types.RuleTypeCertificate)
+	case teamIDType:
+		*i = RuleType(types.RuleTypeTeamID)
+	case signingIDType:
+		*i = RuleType(types.RuleTypeSigningID)
 	default:
 		return fmt.Errorf(`invalid rule type; must be "binary" or "cert"`)
 	}
@@ -56,6 +60,10 @@ func (i *RuleType) String() string {
 		return binType
 	case types.RuleTypeCertificate:
 		return certType
+	case types.RuleTypeTeamID:
+		return teamIDType
+	case types.RuleTypeSigningID:
+		return signingIDType
 	}
 
 	// No default

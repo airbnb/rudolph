@@ -6,6 +6,12 @@ import (
 	"github.com/airbnb/rudolph/pkg/types"
 )
 
+const (
+	monitorMode       = "monitor"
+	lockdownMode      = "lockdown"
+	defaultClientMode = "monitor"
+)
+
 // configMode is a custom type for use as a CLI flag representing the type of config mode being applied
 type ClientMode types.ClientMode
 

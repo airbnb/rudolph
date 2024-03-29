@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -70,16 +71,20 @@ func (rh *ruleHandler) updateRulePolicy(tf flags.TargetFlags, rf flags.RuleInfoF
 	ruleType := rf.RuleType.AsRuleType()
 	rulePolicy := ru.RulePolicy.AsRulePolicy()
 	var description string
-	var sha256 string
-	if *rf.FilePath != "" {
-		fileInfo, err := santa_sensor.RunSantaFileInfo(*rf.FilePath)
-		if err != nil {
-			return fmt.Errorf("encountered an error while attempting to get file information for %q", *rf.FilePath)
-		}
+	var identifier string
 
-		sha256 = fileInfo.SHA256
+	fileInfo, err := santa_sensor.RunSantaFileInfo(*rf.FilePath)
+	if err != nil {
+		return fmt.Errorf("encountered an error while attempting to get file information for %q", *rf.FilePath)
+	}
+
+	if *rf.FilePath != "" {
+		identifier = fileInfo.SHA256
 		description = fmt.Sprintf("%s from %s", fileInfo.Path, tf.SelfMachineID) // FIXME (derek.wang) tf.SelfMachineID is Not initialized.
-		if ruleType == types.Certificate {
+		switch ruleType {
+		case types.RuleTypeBinary:
+			break
+		case types.RuleTypeCertificate:
 			if len(fileInfo.SigningChain) == 0 {
 				return fmt.Errorf("NO SIGNING INFO FOUND FOR GIVEN BINARY")
 			}
@@ -90,13 +95,27 @@ func (rh *ruleHandler) updateRulePolicy(tf flags.TargetFlags, rf flags.RuleInfoF
 				return fmt.Errorf("NO CERTIFICATE NAME FOUND FOR GIVEN BINARY")
 			}
 
-			sha256 = fileInfo.SigningChain[0].SHA256
+			identifier = fileInfo.SigningChain[0].SHA256
 			description = fmt.Sprintf("%v, by %v (%v)", fileInfo.SigningChain[0].CommonName, fileInfo.SigningChain[0].Organization, fileInfo.SigningChain[0].OrganizationalUnit)
+		case types.RuleTypeTeamID:
+			identifier = fileInfo.TeamID
+		case types.RuleTypeSigningID:
+			identifier = fileInfo.SigningID
+		default:
+			log.Printf("error (recovered): encountered unknown ruleType: (%+v)", ruleType)
+			return fmt.Errorf("error (recovered): encountered unknown ruleType: (%+v)", ruleType)
 		}
-
-	} else if *rf.SHA256 != "" {
-		sha256 = *rf.SHA256
+	} else if *rf.Identifier != "" {
+		identifier = *rf.Identifier
 	}
+
+	// TODO
+	// Query if there is an existing rule: and show the before/after
+	// partitionKey := fmt.Sprintf("%s%s", store.MachineRulesPKPrefix, machineID)
+	// ruleName :=
+	// if ruleType == types.RuleTypeTeamID {
+	//     ruleName = fmt.Sprintf("%s%s", store.TeamRulesPKPrefix, identifier)
+	// } else if *rf.SHA256 != "" {
 
 	rulePolicyDescription, err := rulePolicy.MarshalText()
 	if err != nil {
@@ -124,7 +143,7 @@ func (rh *ruleHandler) updateRulePolicy(tf flags.TargetFlags, rf flags.RuleInfoF
 
 	// Query if there is an existing rule: and show the before/after
 	if machineID == "(Global)" {
-		existingItem, err := globalrules.GetGlobalRuleByShaType(rh.dynamodbClient, sha256, ruleType)
+		existingItem, err := globalrules.GetGlobalRuleByShaType(rh.dynamodbClient, identifier, ruleType)
 		if err != nil {
 			return err
 		}
@@ -146,12 +165,12 @@ func (rh *ruleHandler) updateRulePolicy(tf flags.TargetFlags, rf flags.RuleInfoF
 
 		fmt.Println("The current rule is rule:")
 		fmt.Println("  MachineID:   ", machineID, suffix)
-		fmt.Println("  SHA256:      ", existingItem.SHA256)
+		fmt.Println("  Identifier/SHA256:      ", existingItem.Identifier)
 		fmt.Println("  Policy:      ", existingItem.Policy, "  (", string(rulePolicyDescription), ")")
 		fmt.Println("  RuleType:    ", existingItem.RuleType, "  (", string(ruleTypeDescription), ")")
 		fmt.Println("  Description: ", description)
 	} else {
-		existingItem, err := machinerules.GetMachineRuleByShaType(rh.dynamodbClient, machineID, sha256, ruleType)
+		existingItem, err := machinerules.GetMachineRuleByShaType(rh.dynamodbClient, machineID, identifier, ruleType)
 		if err != nil {
 			return err
 		}
@@ -173,7 +192,7 @@ func (rh *ruleHandler) updateRulePolicy(tf flags.TargetFlags, rf flags.RuleInfoF
 
 		fmt.Println("The current rule is rule:")
 		fmt.Println("  MachineID:   ", machineID, suffix)
-		fmt.Println("  SHA256:      ", existingItem.SHA256)
+		fmt.Println("  Identifier/SHA256:      ", existingItem.Identifier)
 		fmt.Println("  Policy:      ", existingItem.Policy, "  (", string(rulePolicyDescription), ")")
 		fmt.Println("  RuleType:    ", existingItem.RuleType, "  (", string(ruleTypeDescription), ")")
 		fmt.Println("  Description: ", description)
@@ -181,7 +200,7 @@ func (rh *ruleHandler) updateRulePolicy(tf flags.TargetFlags, rf flags.RuleInfoF
 
 	fmt.Println("Updating the rule to the following:")
 	fmt.Println("  MachineID:   ", machineID, suffix)
-	fmt.Println("  SHA256:      ", sha256)
+	fmt.Println("  Identifier/SHA256:      ", identifier)
 	fmt.Println("  Policy:      ", rulePolicy, "  (", string(rulePolicyDescription), ")")
 	fmt.Println("  RuleType:    ", ruleType, "  (", string(ruleTypeDescription), ")")
 	fmt.Println("  Description: ", description)
@@ -196,9 +215,9 @@ func (rh *ruleHandler) updateRulePolicy(tf flags.TargetFlags, rf flags.RuleInfoF
 	if text == "ok" || text == "yes" {
 		// Do rule update
 		if tf.IsGlobal {
-			err = rh.globalRuleUpdater.UpdateGlobalRule(sha256, ruleType, rulePolicy)
+			err = rh.globalRuleUpdater.UpdateGlobalRule(identifier, ruleType, rulePolicy)
 		} else {
-			err = rh.machineRuleUpdater.UpdateMachineRulePolicy(machineID, sha256, ruleType, rulePolicy)
+			err = rh.machineRuleUpdater.UpdateMachineRulePolicy(machineID, identifier, ruleType, rulePolicy)
 		}
 		if err != nil {
 			return fmt.Errorf("could not upload rule to dynamodb: %w", err)

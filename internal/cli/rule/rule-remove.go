@@ -1,7 +1,10 @@
 package rule
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/airbnb/rudolph/internal/cli/flags"
 	"github.com/airbnb/rudolph/pkg/clock"
@@ -18,9 +21,10 @@ func init() {
 	tf := flags.TargetFlags{}
 
 	var removeRuleCmd = &cobra.Command{
-		Use:     "remove <rule-name>",
+		Use:     `remove <rule-name> ex: 'TeamID#1234567'`,
 		Aliases: []string{"delete"},
 		Short:   "Removes/deletes a rule from the backing store",
+		Long:    `<rule-name> | <RuleType: Binary,Certificate,TeamID,SigningID>#<Rule Identifier/SHA256: abcdef12345-12345-12345> | 'TeamID#1234567'`,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			region, _ := cmd.Flags().GetString("region")
@@ -47,15 +51,51 @@ func init() {
 }
 
 func removeRule(globalRemover globalrules.RuleRemovalService, machineRuleRemover machinerules.RuleRemovalService, ruleName string, tf flags.TargetFlags) error {
-	if !tf.IsGlobal {
-		machineID, err := tf.GetMachineID()
+	// First, determine which machine to apply
+	var machineID string
+	if !tf.IsGlobal || tf.IsTargetSelf() {
+		var err error
+		machineID, err = tf.GetMachineID()
 		if err != nil {
-			return fmt.Errorf("failed to get MachineID: %v", err)
+			return fmt.Errorf("failed to get MachineID: %w", err)
 		}
-		return machineRuleRemover.RemoveMachineRule(machineID, ruleName)
 	}
 
-	idempotencyKey := uuid.NewString()
+	fmt.Println("Removing the following rule:")
+	if machineID != "" {
+		fmt.Println("  MachineID:   ", machineID)
+	}
+	fmt.Println("  Identifier/SHA256:      ", ruleName)
+	fmt.Println("")
+	fmt.Println(`Apply changes? (Enter: "yes" or "ok")`)
+	fmt.Print("> ")
 
-	return globalRemover.RemoveGlobalRule(ruleName, idempotencyKey)
+	// Read confirmation
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+	text = strings.Replace(text, "\n", "", -1)
+	if strings.ToLower(text) == "ok" || strings.ToLower(text) == "yes" {
+		// Do rule deletion
+		if !tf.IsGlobal {
+			machineID, err := tf.GetMachineID()
+			if err != nil {
+				return fmt.Errorf("failed to get MachineID: %v", err)
+			}
+			return machineRuleRemover.RemoveMachineRule(machineID, ruleName)
+		}
+
+		idempotencyKey := uuid.NewString()
+
+		err := globalRemover.RemoveGlobalRule(ruleName, idempotencyKey)
+		if err != nil {
+			return fmt.Errorf("failed to remove global rule: %v", err)
+		}
+
+		fmt.Println("Successfully sent a rule to dynamodb")
+	} else {
+		fmt.Println("Well ok then")
+	}
+	fmt.Println("")
+
+	return nil
 }

@@ -13,7 +13,7 @@ func init() {
 	rf := flags.RuleInfoFlags{}
 
 	var ruleAllowCmd = &cobra.Command{
-		Use:   "allow [-f <file-path>|-s <sha>] -t <rule-type> [-m <machine-id>|--global]",
+		Use:   "allow [-f <file-path>|-i <identifier/sha256>] -t <rule-type> [-m <machine-id>|--global]",
 		Short: "Create a rule that applies the Allowlist policy to the specified file",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {

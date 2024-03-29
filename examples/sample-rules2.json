@@ -1,13 +1,13 @@
 [
   {
-    "sha256": "d84db96af8c2e60ac4c851a21ec460f6f84e0235beb17d24a78712b9b021ed57",
+    "identifier": "d84db96af8c2e60ac4c851a21ec460f6f84e0235beb17d24a78712b9b021ed57",
     "type": "CERTIFICATE",
     "policy": "ALLOWLIST",
     "custom_msg": "",
     "description": "Software Signing by Apple Inc."
   },
   {
-    "sha256": "345a8e098bd04794aaeefda8c9ef56a0bf3d3706d67d35bc0e23f11bb3bffce5",
+    "identifier": "345a8e098bd04794aaeefda8c9ef56a0bf3d3706d67d35bc0e23f11bb3bffce5",
     "type": "CERTIFICATE",
     "policy": "ALLOWLIST",
     "custom_msg": "",

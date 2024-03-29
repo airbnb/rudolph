@@ -172,9 +172,9 @@ func runCsvImport(
 
 	// Start taking lines from the csv and shoveling them into the workers
 	for line := range data {
-		sha256, ok := line["sha256"]
+		identifier, ok := line["identifier"]
 		if !ok {
-			panic("no sha256")
+			panic("no identifier")
 		}
 		ruleTypeStr, ok := line["type"]
 		if !ok {
@@ -205,7 +205,7 @@ func runCsvImport(
 		}
 
 		rules <- fileRule{
-			SHA256:        sha256,
+			Identifier:    identifier,
 			RuleType:      ruleType,
 			Policy:        policy,
 			Description:   description,
@@ -232,14 +232,21 @@ func ddbWriter(
 		var err error
 		atomic.AddUint64(total, 1)
 
-		suffix := ""
-		if rule.RuleType == types.Certificate {
+		var suffix string
+		switch rule.RuleType {
+		case types.RuleTypeCertificate:
 			suffix = " (Cert)"
+		case types.RuleTypeTeamID:
+			suffix = " (TeamID)"
+		case types.RuleTypeSigningID:
+			suffix = " (SigningID)"
+		default:
+			suffix = ""
 		}
 
 		if rule.Policy == types.RulePolicyRemove {
-			fmt.Printf("  Removing rule: [%s]\n", rule.SHA256)
-			sortkey := rudolphrules.RuleSortKeyFromTypeSHA(rule.SHA256, rule.RuleType)
+			fmt.Printf("  Removing rule: [%s]\n", rule.Identifier)
+			sortkey := rudolphrules.RuleSortKeyFromTypeIdentifier(rule.Identifier, rule.RuleType)
 			err = globalrules.RemoveGlobalRule(
 				timeProvider,
 				client,
@@ -249,11 +256,11 @@ func ddbWriter(
 			)
 
 		} else {
-			fmt.Printf("  Writing rule: [%+v] %s%s\n", rule.Policy, rule.SHA256, suffix)
+			fmt.Printf("  Writing rule: [%+v] %s%s\n", rule.Policy, rule.Identifier, suffix)
 			err = globalrules.AddNewGlobalRule(
 				timeProvider,
 				client,
-				rule.SHA256,
+				rule.Identifier,
 				rule.RuleType,
 				rule.Policy,
 				rule.Description,
