@@ -3,8 +3,7 @@ package types
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
+	awstypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
 // RuleType represents a Santa rule type.
@@ -77,31 +76,32 @@ func (r RuleType) MarshalText() ([]byte, error) {
 }
 
 // MarshalDynamoDBAttributeValue for ddb
-func (r RuleType) MarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) error {
+func (r RuleType) MarshalDynamoDBAttributeValue() (awstypes.AttributeValue, error) {
 	var s string
 	switch r {
 	case RuleTypeBinary:
-		// s = "BINARY"
 		s = "1"
 	case RuleTypeCertificate:
-		// s = "CERTIFICATE"
 		s = "2"
 	case RuleTypeSigningID:
 		s = "3"
 	case RuleTypeTeamID:
 		s = "4"
 	default:
-		return fmt.Errorf("unknown rule_type value %q", r)
+		return nil, fmt.Errorf("unknown rule_type value %q", r)
 	}
-	// av.S = &s
-	av.N = &s
-	return nil
+	return &awstypes.AttributeValueMemberN{Value: s}, nil
 }
 
 // UnmarshalDynamoDBAttributeValue implements the Unmarshaler interface
-func (r *RuleType) UnmarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) error {
-	// switch t := aws.StringValue(av.S); t {
-	switch t := aws.StringValue(av.N); t {
+func (r *RuleType) UnmarshalDynamoDBAttributeValue(av awstypes.AttributeValue) error {
+	// return attributevalue.Unmarshal(av, p)
+	v, ok := av.(*awstypes.AttributeValueMemberN)
+	if !ok {
+		return fmt.Errorf("unexpected rule_type value type %T", av)
+	}
+
+	switch t := v.Value; t {
 	case "1":
 		fallthrough
 	case "BINARY":

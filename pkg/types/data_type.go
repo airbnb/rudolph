@@ -4,8 +4,6 @@ import (
 	"fmt"
 
 	awstypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
 // DataType identifies the current DynamoDB data model
@@ -87,8 +85,15 @@ func (dt DataType) MarshalDynamoDBAttributeValue() (awstypes.AttributeValue, err
 }
 
 // UnmarshalDynamoDBAttributeValue implements the Unmarshaler interface
-func (dt *DataType) UnmarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) error {
-	switch t := aws.StringValue(av.N); t {
+// func (dt *DataType) UnmarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) error {
+func (dt *DataType) UnmarshalDynamoDBAttributeValue(av awstypes.AttributeValue) error {
+	// return attributevalue.Unmarshal(av, dt)
+	v, ok := av.(*awstypes.AttributeValueMemberN)
+	if !ok {
+		return fmt.Errorf("unexpected data_type value type %T", av)
+	}
+
+	switch t := v.Value; t {
 	case "1":
 		fallthrough
 	case "SENSOR_DATA":
@@ -108,5 +113,6 @@ func (dt *DataType) UnmarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue)
 	default:
 		return fmt.Errorf("unknown data_type value %q", t)
 	}
+
 	return nil
 }

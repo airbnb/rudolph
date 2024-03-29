@@ -3,8 +3,7 @@ package types
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
+	awstypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
 // Policy represents the Santa Rule Policy.
@@ -79,7 +78,7 @@ func (p Policy) MarshalText() ([]byte, error) {
 }
 
 // MarshalDynamoDBAttributeValue for ddb
-func (p Policy) MarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) error {
+func (p Policy) MarshalDynamoDBAttributeValue() (awstypes.AttributeValue, error) {
 	var s string
 	switch p {
 	case RulePolicyAllowlist:
@@ -95,39 +94,32 @@ func (p Policy) MarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) error
 	case RulePolicyAllowlistTransitive:
 		s = "6"
 	default:
-		return fmt.Errorf("unknown policy value %q", p)
+		return nil, fmt.Errorf("unknown policy value %q", p)
 	}
-	// av.S = &s
-	av.N = &s
-	return nil
+	return &awstypes.AttributeValueMemberN{Value: s}, nil
 }
 
 // UnmarshalDynamoDBAttributeValue implements the Unmarshaler interface
-func (p *Policy) UnmarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) error {
-	switch t := aws.StringValue(av.N); t {
+
+func (p *Policy) UnmarshalDynamoDBAttributeValue(av awstypes.AttributeValue) error {
+	// return attributevalue.Unmarshal(av, p)
+	v, ok := av.(*awstypes.AttributeValueMemberN)
+	if !ok {
+		return fmt.Errorf("unexpected policy value type %T", av)
+	}
+
+	switch t := v.Value; t {
 	case "1":
-		fallthrough
-	case "ALLOWLIST":
 		*p = RulePolicyAllowlist
 	case "2":
-		fallthrough
-	case "BLOCKLIST":
 		*p = RulePolicyBlocklist
 	case "3":
-		fallthrough
-	case "SILENT_BLOCKLIST":
 		*p = RulePolicySilentBlocklist
 	case "4":
-		fallthrough
-	case "REMOVE":
 		*p = RulePolicyRemove
 	case "5":
-		fallthrough
-	case "ALLOWLIST_COMPILER":
 		*p = RulePolicyAllowlistCompiler
 	case "6":
-		fallthrough
-	case "ALLOWLIST_TRANSITIVE":
 		*p = RulePolicyAllowlistTransitive
 	default:
 		return fmt.Errorf("unknown policy value %q", t)
