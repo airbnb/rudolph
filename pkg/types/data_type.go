@@ -23,22 +23,32 @@ func (dt *DataType) UnmarshalText(text []byte) error {
 	case "SENSOR_DATA":
 		fallthrough
 	case "SENSORDATA":
+		fallthrough
+	case "SensorData":
 		*dt = DataTypeSensorData
 	case "RULES_FEED":
 		fallthrough
 	case "RULESFEED":
+		fallthrough
+	case "RulesFeed":
 		*dt = DataTypeRulesFeed
 	case "SYNC_STATE":
 		fallthrough
 	case "SYNCSTATE":
+		fallthrough
+	case "SyncState":
 		*dt = DataTypeSyncState
 	case "MACHINE_CONFIG":
 		fallthrough
 	case "MACHINECONFIG":
-		*dt = DataTypeGlobalConfig
+		fallthrough
+	case "MachineConfig":
+		*dt = DataTypeMachineConfig
 	case "GLOBAL_CONFIG":
 		fallthrough
 	case "GLOBALCONFIG":
+		fallthrough
+	case "GlobalConfig":
 		*dt = DataTypeGlobalConfig
 	default:
 		return fmt.Errorf("unknown data_type value %q", mode)
@@ -50,15 +60,15 @@ func (dt *DataType) UnmarshalText(text []byte) error {
 func (dt DataType) MarshalText() ([]byte, error) {
 	switch dt {
 	case DataTypeSensorData:
-		return []byte("SENSORDATA"), nil
+		return []byte("SensorData"), nil
 	case DataTypeSyncState:
-		return []byte("SYNCSTATE"), nil
+		return []byte("SyncState"), nil
 	case DataTypeMachineConfig:
-		return []byte("MACHINECONFIG"), nil
+		return []byte("MachineConfig"), nil
 	case DataTypeGlobalConfig:
-		return []byte("GLOBALCONFIG"), nil
+		return []byte("GlobalConfig"), nil
 	case DataTypeRulesFeed:
-		return []byte("RULESFEED"), nil
+		return []byte("RulesFeed"), nil
 	default:
 		return nil, fmt.Errorf("unknown data_type %s", dt)
 	}
@@ -85,12 +95,10 @@ func (dt DataType) MarshalDynamoDBAttributeValue() (awstypes.AttributeValue, err
 }
 
 // UnmarshalDynamoDBAttributeValue implements the Unmarshaler interface
-// func (dt *DataType) UnmarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) error {
 func (dt *DataType) UnmarshalDynamoDBAttributeValue(av awstypes.AttributeValue) error {
-	// return attributevalue.Unmarshal(av, dt)
-	v, ok := av.(*awstypes.AttributeValueMemberN)
+	v, ok := av.(*awstypes.AttributeValueMemberS)
 	if !ok {
-		return fmt.Errorf("unexpected data_type value type %T", av)
+		return fmt.Errorf("unexpected data_type value type: %T", av)
 	}
 
 	switch t := v.Value; t {
@@ -99,17 +107,41 @@ func (dt *DataType) UnmarshalDynamoDBAttributeValue(av awstypes.AttributeValue) 
 	case "SENSOR_DATA":
 		fallthrough
 	case "SENSORDATA":
+		fallthrough
+	case "SensorData":
 		*dt = DataTypeSensorData
 	case "2":
 		fallthrough
 	case "SYNC_STATE":
 		fallthrough
 	case "SYNCSTATE":
+		fallthrough
+	case "SyncState":
 		*dt = DataTypeSyncState
 	case "3":
 		fallthrough
+	case "GLOBAL_CONFIG":
+		fallthrough
+	case "GLOBALCONFIG":
+		fallthrough
+	case "GlobalConfig":
+		*dt = DataTypeGlobalConfig
+	case "4":
+		fallthrough
 	case "MACHINE_CONFIG":
+		fallthrough
+	case "MACHINECONFIG":
+		fallthrough
+	case "MachineConfig":
 		*dt = DataTypeMachineConfig
+	case "5":
+		fallthrough
+	case "RULES_FEED":
+		fallthrough
+	case "RULESFEED":
+		fallthrough
+	case "RulesFeed":
+		*dt = DataTypeRulesFeed
 	default:
 		return fmt.Errorf("unknown data_type value %q", t)
 	}
