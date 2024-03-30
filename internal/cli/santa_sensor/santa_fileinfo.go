@@ -13,6 +13,8 @@ type santaFileInfo struct {
 	Path                  string             `json:"Path"`
 	SHA256                string             `json:"SHA-256"`
 	SHA1                  string             `json:"SHA-1"`
+	TeamID                string             `json:"Team ID"`
+	SigningID             string             `json:"Signing ID"`
 	BundleName            string             `json:"Bundle Name"`
 	BundleVersion         string             `json:"Bundle Version"`
 	BundleVersionStr      string             `json:"Bundle Version Str"`

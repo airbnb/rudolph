@@ -28,7 +28,7 @@ func (t *TargetFlags) AddTargetFlags(cmd *cobra.Command) {
 }
 
 func (t *TargetFlags) AddTargetFlagsRules(cmd *cobra.Command) {
-	cmd.Flags().BoolVarP(&t.IsGlobal, "global", "g", false, "Retrive rules that apply globally.")
+	cmd.Flags().BoolVarP(&t.IsGlobal, "global", "g", false, "Retrieve rules that apply globally.")
 	cmd.Flags().StringVarP(&t.MachineID, "machine", "m", "", "Retrieve rules for a single machine. Omit to apply to the current machine.")
 
 }

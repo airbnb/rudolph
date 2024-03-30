@@ -16,11 +16,19 @@ func PingDatabase(client dynamodb.QueryAPI) (err error) {
 	return
 }
 
-func GetPaginatedGlobalRules(client dynamodb.QueryAPI, limit int, exclusiveStartKey *dynamodb.PrimaryKey) (items *[]GlobalRuleRow, lastEvaluatedKey *dynamodb.PrimaryKey, err error) {
+func GetPaginatedGlobalRules(
+	client dynamodb.QueryAPI,
+	limit int,
+	exclusiveStartKey *dynamodb.PrimaryKey,
+) (
+	items *[]GlobalRuleRow,
+	lastEvaluatedKey *dynamodb.PrimaryKey,
+	err error,
+) {
 	partitionKey := globalRulesPK
 
 	if limit <= 0 {
-		err = errors.New("Invalid limit/batchsize specified")
+		err = errors.New("invalid limit/batchsize specified")
 		return
 	}
 
@@ -65,6 +73,13 @@ func GetPaginatedGlobalRules(client dynamodb.QueryAPI, limit int, exclusiveStart
 	if err != nil {
 		err = fmt.Errorf("failed to unmarshal result from DynamoDB: %w", err)
 		return
+	}
+
+	// To support legacy SHA256 types, we must transform the datasets before returning
+	for _, item := range *items {
+		if item.SHA256 != "" && item.Identifier == "" {
+			item.Identifier = item.SHA256
+		}
 	}
 	return
 }

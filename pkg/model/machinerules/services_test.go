@@ -62,7 +62,7 @@ func (m *MockDynamodb) PutItem(item interface{}) (*awsdynamodb.PutItemOutput, er
 
 func Test_Service_Get(t *testing.T) {
 	machineID := "858CBF28-5EAA-58A3-A155-BA5E81D5B5DD"
-	sha256 := "ed0a9ba83449b5966363e0c20fe7755defcb2d7136657d3880bb462a8d7a7025"
+	identifier := "ed0a9ba83449b5966363e0c20fe7755defcb2d7136657d3880bb462a8d7a7025"
 
 	t.Run("GetItem returns no item", func(t *testing.T) {
 		mocked := &MockDynamodb{}
@@ -72,7 +72,7 @@ func Test_Service_Get(t *testing.T) {
 			dynamodb: mocked,
 		}
 
-		item, err := service.Get(machineID, sha256, types.Binary)
+		item, err := service.Get(machineID, identifier, types.Binary)
 		assert.Empty(t, err)
 		assert.Empty(t, item)
 	})
@@ -90,6 +90,9 @@ func Test_Service_Get(t *testing.T) {
 				"SHA256": &awsdynamodbtypes.AttributeValueMemberS{
 					Value: "ed0a9ba83449b5966363e0c20fe7755defcb2d7136657d3880bb462a8d7a7025",
 				},
+				"Identifier": &awsdynamodbtypes.AttributeValueMemberS{
+					Value: "ed0a9ba83449b5966363e0c20fe7755defcb2d7136657d3880bb462a8d7a7025",
+				},
 				"Policy": &awsdynamodbtypes.AttributeValueMemberN{
 					Value: "1",
 				},
@@ -100,9 +103,10 @@ func Test_Service_Get(t *testing.T) {
 			dynamodb: mocked,
 		}
 
-		item, err := service.Get(machineID, sha256, types.Binary)
+		item, err := service.Get(machineID, identifier, types.Binary)
 		assert.Empty(t, err)
 
+		assert.Equal(t, item.Identifier, "ed0a9ba83449b5966363e0c20fe7755defcb2d7136657d3880bb462a8d7a7025")
 		assert.Equal(t, item.SHA256, "ed0a9ba83449b5966363e0c20fe7755defcb2d7136657d3880bb462a8d7a7025")
 		assert.Equal(t, item.Policy, types.Allowlist)
 	})
@@ -111,7 +115,7 @@ func Test_Service_Get(t *testing.T) {
 func Test_Service_Add_OK(t *testing.T) {
 	t.Run("PutItem works with no errors", func(t *testing.T) {
 		machineID := "858CBF28-5EAA-58A3-A155-BA5E81D5B5DD"
-		sha256 := "ed0a9ba83449b5966363e0c20fe7755defcb2d7136657d3880bb462a8d7a7025"
+		identifier := "ed0a9ba83449b5966363e0c20fe7755defcb2d7136657d3880bb462a8d7a7025"
 		ruleType := types.Binary
 		description := "Description"
 		policy := types.AllowlistCompiler
@@ -123,14 +127,14 @@ func Test_Service_Add_OK(t *testing.T) {
 		mocked := &MockDynamodb{}
 		mocked.On("PutItem", mock.MatchedBy(func(item interface{}) bool {
 			rule := item.(MachineRuleRow)
-			return rule.Description == description && rule.Policy == policy && rule.SHA256 == sha256
+			return rule.Description == description && rule.Policy == policy && rule.Identifier == identifier
 		})).Return(&awsdynamodb.PutItemOutput{}, nil)
 
 		service := ConcreteMachineRulesService{
 			dynamodb: mocked,
 		}
 
-		err := service.Add(machineID, sha256, ruleType, policy, description, expires)
+		err := service.Add(machineID, identifier, ruleType, policy, description, expires)
 		assert.Empty(t, err)
 		mocked.AssertCalled(t, "PutItem", mock.Anything)
 	})

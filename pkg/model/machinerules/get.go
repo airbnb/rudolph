@@ -35,8 +35,13 @@ func getItemAsMachineRule(client dynamodb.GetItemAPI, partitionKey string, sortK
 	return
 }
 
+// @deprecated
 func GetMachineRuleByShaType(client dynamodb.GetItemAPI, machineID string, sha256 string, ruleType types.RuleType) (rule *MachineRuleRow, err error) {
+	return GetMachineRuleByIdentifierType(client, machineID, sha256, ruleType)
+}
+
+func GetMachineRuleByIdentifierType(client dynamodb.GetItemAPI, machineID string, identifier string, ruleType types.RuleType) (rule *MachineRuleRow, err error) {
 	pk := machineRulePK(machineID)
-	sk := machineRuleSK(sha256, ruleType)
+	sk := machineRuleSK(identifier, ruleType)
 	return getItemAsMachineRule(client, pk, sk)
 }

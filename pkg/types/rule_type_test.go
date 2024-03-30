@@ -3,7 +3,7 @@ package types
 import (
 	"testing"
 
-	"github.com/aws/aws-sdk-go/service/dynamodb"
+	awstypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,22 +62,21 @@ func TestRuleType_UnmarshalText(t *testing.T) {
 
 func TestRuleType_MarshalDynamoDBAttributeValue(t *testing.T) {
 	tests := []struct {
-		name    string
-		rule    RuleType
-		want    *dynamodb.AttributeValue
-		wantErr bool
+		name     string
+		ruleType RuleType
+		want     awstypes.AttributeValue
+		wantErr  bool
 	}{
-		{"BINARY", RuleTypeBinary, new(dynamodb.AttributeValue).SetN("1"), false},
-		{"CERTIFICATE", RuleTypeCertificate, new(dynamodb.AttributeValue).SetN("2"), false},
-		{"SIGNINGID", RuleTypeSigningID, new(dynamodb.AttributeValue).SetN("3"), false},
-		{"TEAMID", RuleTypeTeamID, new(dynamodb.AttributeValue).SetN("4"), false},
-		{"INVALID", RuleType(0), new(dynamodb.AttributeValue), true},
+		{"BINARY", RuleTypeBinary, &awstypes.AttributeValueMemberN{Value: "1"}, false},
+		{"CERTIFICATE", RuleTypeCertificate, &awstypes.AttributeValueMemberN{Value: "2"}, false},
+		{"SIGNINGID", RuleTypeSigningID, &awstypes.AttributeValueMemberN{Value: "3"}, false},
+		{"TEAMID", RuleTypeTeamID, &awstypes.AttributeValueMemberN{Value: "4"}, false},
+		{"INVALID", RuleType(0), nil, true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			av := &dynamodb.AttributeValue{}
-			err := tt.rule.MarshalDynamoDBAttributeValue(av)
+			av, err := tt.ruleType.MarshalDynamoDBAttributeValue()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("RuleType.MarshalDynamoDBAttributeValue() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -90,15 +89,15 @@ func TestRuleType_MarshalDynamoDBAttributeValue(t *testing.T) {
 func TestRuleType_UnmarshalDynamoDBAttributeValue(t *testing.T) {
 	tests := []struct {
 		name    string
-		av      *dynamodb.AttributeValue
+		av      awstypes.AttributeValue
 		want    RuleType
 		wantErr bool
 	}{
-		{"BINARY", new(dynamodb.AttributeValue).SetN("1"), RuleTypeBinary, false},
-		{"CERTIFICATE", new(dynamodb.AttributeValue).SetN("2"), RuleTypeCertificate, false},
-		{"SIGNINGID", new(dynamodb.AttributeValue).SetN("3"), RuleTypeSigningID, false},
-		{"TEAMID", new(dynamodb.AttributeValue).SetN("4"), RuleTypeTeamID, false},
-		{"INVALID", new(dynamodb.AttributeValue).SetN("0"), RuleType(0), true},
+		{"BINARY", &awstypes.AttributeValueMemberN{Value: "1"}, RuleTypeBinary, false},
+		{"CERTIFICATE", &awstypes.AttributeValueMemberN{Value: "2"}, RuleTypeCertificate, false},
+		{"SIGNINGID", &awstypes.AttributeValueMemberN{Value: "3"}, RuleTypeSigningID, false},
+		{"TEAMID", &awstypes.AttributeValueMemberN{Value: "4"}, RuleTypeTeamID, false},
+		{"INVALID", nil, RuleType(0), true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

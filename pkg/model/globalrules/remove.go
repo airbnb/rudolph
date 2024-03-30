@@ -1,7 +1,6 @@
 package globalrules
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/airbnb/rudolph/pkg/clock"
@@ -15,13 +14,19 @@ import (
 // RemoveGlobalRule will remove the rule from the global repository of rules.
 // It also creates a new rule entry in the feed that explicitly tells future syncs
 // to remove the rule too.
-func RemoveGlobalRule(timeProvider clock.TimeProvider, getter dynamodb.GetItemAPI, transacter dynamodb.TransactWriteItemsAPI, ruleSortKey string, txnIdempotencyKey string) (err error) {
+func RemoveGlobalRule(
+	timeProvider clock.TimeProvider,
+	getter dynamodb.GetItemAPI,
+	transacter dynamodb.TransactWriteItemsAPI,
+	ruleSortKey string,
+	txnIdempotencyKey string,
+) error {
 	rule, err := GetGlobalRuleBySortKey(getter, ruleSortKey)
 	if err != nil {
 		return fmt.Errorf("query to retrieve existing rule failed: %w", err)
 	}
 	if rule == nil {
-		return errors.New(fmt.Sprintf("no such rule with sk (%s) exists", ruleSortKey))
+		return fmt.Errorf("no such rule with sk (%s) exists", ruleSortKey)
 	}
 
 	// Delete the global rule
@@ -55,7 +60,7 @@ func RemoveGlobalRule(timeProvider clock.TimeProvider, getter dynamodb.GetItemAP
 		return fmt.Errorf("transaction delete failed: %w", err)
 	}
 
-	return
+	return nil
 }
 
 type RuleRemovalService interface {

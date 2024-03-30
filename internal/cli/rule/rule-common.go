@@ -3,6 +3,7 @@ package rule
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -28,19 +29,23 @@ var (
 )
 
 func applyPolicyForPath(timeProvider clock.TimeProvider, client dynamodb.DynamoDBClient, policy types.Policy, tf flags.TargetFlags, rf flags.RuleInfoFlags) (err error) {
-	// Second, determine the rule type and sha256
+	// Second, determine the rule type and identifier
 	ruleType := (*rf.RuleType).AsRuleType()
 	var description string
-	var sha256 string
+	var identifier string
+
 	if *rf.FilePath != "" {
 		fileInfo, err := santa_sensor.RunSantaFileInfo(*rf.FilePath)
 		if err != nil {
 			return fmt.Errorf("encountered an error while attempting to get file information for %q", *rf.FilePath)
 		}
-
-		sha256 = fileInfo.SHA256
+		identifier = fileInfo.SHA256
 		description = fmt.Sprintf("%s from %s", fileInfo.Path, tf.SelfMachineID) // FIXME (derek.wang) tf.SelfMachineID is Not initialized.
-		if ruleType == types.Certificate {
+
+		switch ruleType {
+		case types.RuleTypeBinary:
+			break
+		case types.RuleTypeCertificate:
 			if len(fileInfo.SigningChain) == 0 {
 				return fmt.Errorf("NO SIGNING INFO FOUND FOR GIVEN BINARY")
 			}
@@ -51,12 +56,18 @@ func applyPolicyForPath(timeProvider clock.TimeProvider, client dynamodb.DynamoD
 				return fmt.Errorf("NO CERTIFICATE NAME FOUND FOR GIVEN BINARY")
 			}
 
-			sha256 = fileInfo.SigningChain[0].SHA256
+			identifier = fileInfo.SigningChain[0].SHA256
 			description = fmt.Sprintf("%v, by %v (%v)", fileInfo.SigningChain[0].CommonName, fileInfo.SigningChain[0].Organization, fileInfo.SigningChain[0].OrganizationalUnit)
+		case types.RuleTypeTeamID:
+			identifier = fileInfo.TeamID
+		case types.RuleTypeSigningID:
+			identifier = fileInfo.SigningID
+		default:
+			log.Printf("error (recovered): encountered unknown ruleType: (%+v)", ruleType)
+			return fmt.Errorf("error (recovered): encountered unknown ruleType: (%+v)", ruleType)
 		}
-
-	} else if *rf.SHA256 != "" {
-		sha256 = *rf.SHA256
+	} else if *rf.Identifier != "" {
+		identifier = *rf.Identifier
 	}
 
 	// TODO
@@ -93,7 +104,7 @@ func applyPolicyForPath(timeProvider clock.TimeProvider, client dynamodb.DynamoD
 
 	fmt.Println("Uploading the following rule:")
 	fmt.Println("  MachineID:   ", machineID, suffix)
-	fmt.Println("  SHA256:      ", sha256)
+	fmt.Println("  Identifier/SHA256:      ", identifier)
 	fmt.Println("  Policy:      ", policy, "  (", string(policyDescription), ")")
 	fmt.Println("  RuleType:    ", ruleType, "  (", string(ruleTypeDescription), ")")
 	fmt.Println("  Description: ", description)
@@ -105,13 +116,13 @@ func applyPolicyForPath(timeProvider clock.TimeProvider, client dynamodb.DynamoD
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	text = strings.Replace(text, "\n", "", -1)
-	if text == "ok" || text == "yes" {
+	if strings.ToLower(text) == "ok" || strings.ToLower(text) == "yes" {
 		// Do rule creation
 		if tf.IsGlobal {
-			err = globalrules.AddNewGlobalRule(timeProvider, client, sha256, ruleType, policy, description)
+			err = globalrules.AddNewGlobalRule(timeProvider, client, identifier, ruleType, policy, description)
 		} else {
 			expires := timeProvider.Now().Add(time.Hour * machinerules.MachineRuleDefaultExpirationHours).UTC()
-			err = machinerules.AddNewMachineRule(client, machineID, sha256, ruleType, policy, description, expires)
+			err = machinerules.AddNewMachineRule(client, machineID, identifier, ruleType, policy, description, expires)
 		}
 		if err != nil {
 			return fmt.Errorf("could not upload rule to DynamoDB: %w", err)

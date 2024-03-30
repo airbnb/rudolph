@@ -3,7 +3,7 @@ package types
 import (
 	"testing"
 
-	"github.com/aws/aws-sdk-go/service/dynamodb"
+	awstypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -68,22 +68,21 @@ func TestPolicyTypes_MarshalDynamoDBAttributeValue(t *testing.T) {
 	tests := []struct {
 		name    string
 		policy  Policy
-		want    *dynamodb.AttributeValue
+		want    awstypes.AttributeValue
 		wantErr bool
 	}{
-		{"ALLOWLIST", RulePolicyAllowlist, new(dynamodb.AttributeValue).SetN("1"), false},
-		{"BLOCKLIST", RulePolicyBlocklist, new(dynamodb.AttributeValue).SetN("2"), false},
-		{"SILENT_BLOCKLIST", RulePolicySilentBlocklist, new(dynamodb.AttributeValue).SetN("3"), false},
-		{"REMOVE", RulePolicyRemove, new(dynamodb.AttributeValue).SetN("4"), false},
-		{"ALLOWLIST_COMPILER", RulePolicyAllowlistCompiler, new(dynamodb.AttributeValue).SetN("5"), false},
-		{"ALLOWLIST_TRANSITIVE", RulePolicyAllowlistTransitive, new(dynamodb.AttributeValue).SetN("6"), false},
-		{"MISSPELLED", Policy(0), new(dynamodb.AttributeValue), true},
+		{"ALLOWLIST", RulePolicyAllowlist, &awstypes.AttributeValueMemberN{Value: "1"}, false},
+		{"BLOCKLIST", RulePolicyBlocklist, &awstypes.AttributeValueMemberN{Value: "2"}, false},
+		{"SILENT_BLOCKLIST", RulePolicySilentBlocklist, &awstypes.AttributeValueMemberN{Value: "3"}, false},
+		{"REMOVE", RulePolicyRemove, &awstypes.AttributeValueMemberN{Value: "4"}, false},
+		{"ALLOWLIST_COMPILER", RulePolicyAllowlistCompiler, &awstypes.AttributeValueMemberN{Value: "5"}, false},
+		{"ALLOWLIST_TRANSITIVE", RulePolicyAllowlistTransitive, &awstypes.AttributeValueMemberN{Value: "6"}, false},
+		{"MISSPELLED", Policy(0), nil, true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			av := &dynamodb.AttributeValue{}
-			err := tt.policy.MarshalDynamoDBAttributeValue(av)
+			av, err := tt.policy.MarshalDynamoDBAttributeValue()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Policy.MarshalDynamoDBAttributeValue() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -96,17 +95,17 @@ func TestPolicyTypes_MarshalDynamoDBAttributeValue(t *testing.T) {
 func TestPolicyType_UnmarshalDynamoDBAttributeValue(t *testing.T) {
 	tests := []struct {
 		name    string
-		av      *dynamodb.AttributeValue
+		av      awstypes.AttributeValue
 		want    Policy
 		wantErr bool
 	}{
-		{"ALLOWLIST", new(dynamodb.AttributeValue).SetN("1"), RulePolicyAllowlist, false},
-		{"BLOCKLIST", new(dynamodb.AttributeValue).SetN("2"), RulePolicyBlocklist, false},
-		{"SILENT_BLOCKLIST", new(dynamodb.AttributeValue).SetN("3"), RulePolicySilentBlocklist, false},
-		{"REMOVE", new(dynamodb.AttributeValue).SetN("4"), RulePolicyRemove, false},
-		{"ALLOWLIST_COMPILER", new(dynamodb.AttributeValue).SetN("5"), RulePolicyAllowlistCompiler, false},
-		{"ALLOWLIST_TRANSITIVE", new(dynamodb.AttributeValue).SetN("6"), RulePolicyAllowlistTransitive, false},
-		{"MISSPELLED", new(dynamodb.AttributeValue), Policy(0), true},
+		{"ALLOWLIST", &awstypes.AttributeValueMemberN{Value: "1"}, RulePolicyAllowlist, false},
+		{"BLOCKLIST", &awstypes.AttributeValueMemberN{Value: "2"}, RulePolicyBlocklist, false},
+		{"SILENT_BLOCKLIST", &awstypes.AttributeValueMemberN{Value: "3"}, RulePolicySilentBlocklist, false},
+		{"REMOVE", &awstypes.AttributeValueMemberN{Value: "4"}, RulePolicyRemove, false},
+		{"ALLOWLIST_COMPILER", &awstypes.AttributeValueMemberN{Value: "5"}, RulePolicyAllowlistCompiler, false},
+		{"ALLOWLIST_TRANSITIVE", &awstypes.AttributeValueMemberN{Value: "6"}, RulePolicyAllowlistTransitive, false},
+		{"MISSPELLED", nil, Policy(0), true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -119,5 +118,4 @@ func TestPolicyType_UnmarshalDynamoDBAttributeValue(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
-
 }

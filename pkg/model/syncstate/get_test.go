@@ -52,7 +52,6 @@ func Test_GetIntendedConfig(t *testing.T) {
 	}
 
 	for _, test := range cases {
-		dataTypeAV, _ := test.expectedDataType.MarshalDynamoDBAttributeValue()
 		dynamodb := getSyncState(
 			func(key dynamodb.PrimaryKey, consistentRead bool) (*awsdynamodb.GetItemOutput, error) {
 				if test.dbError {
@@ -66,7 +65,7 @@ func Test_GetIntendedConfig(t *testing.T) {
 							Item: map[string]awstypes.AttributeValue{
 								"CleanSync": &awstypes.AttributeValueMemberBOOL{Value: false},
 								"BatchSize": &awstypes.AttributeValueMemberN{Value: "31"},
-								"DataType":  dataTypeAV,
+								"DataType":  &awstypes.AttributeValueMemberS{Value: string(test.expectedDataType)},
 							},
 						}, nil
 					}

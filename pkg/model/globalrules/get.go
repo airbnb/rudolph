@@ -12,13 +12,22 @@ func GetGlobalRuleBySortKey(client dynamodb.GetItemAPI, ruleSortKey string) (*Gl
 	return getItemAsGlobalRule(client, globalRulesPK, ruleSortKey)
 }
 
+// @deprecated Use GetGlobalRuleByIdentifier
 func GetGlobalRuleByShaType(client dynamodb.GetItemAPI, sha256 string, ruleType types.RuleType) (*GlobalRuleRow, error) {
+	return GetGlobalRuleByIdentifier(client, sha256, ruleType)
+}
+
+func GetGlobalRuleByIdentifier(client dynamodb.GetItemAPI, identifier string, ruleType types.RuleType) (*GlobalRuleRow, error) {
 	pk := globalRulesPK
-	sk := globalRulesSK(sha256, ruleType)
+	sk := globalRulesSK(identifier, ruleType)
 	return getItemAsGlobalRule(client, pk, sk)
 }
 
-func getItemAsGlobalRule(client dynamodb.GetItemAPI, partitionKey string, sortKey string) (rule *GlobalRuleRow, err error) {
+func getItemAsGlobalRule(
+	client dynamodb.GetItemAPI,
+	partitionKey string,
+	sortKey string,
+) (rule *GlobalRuleRow, err error) {
 	output, err := client.GetItem(
 		dynamodb.PrimaryKey{
 			PartitionKey: partitionKey,
@@ -40,6 +49,10 @@ func getItemAsGlobalRule(client dynamodb.GetItemAPI, partitionKey string, sortKe
 	if err != nil {
 		err = fmt.Errorf("succeeded GetItem but failed to unmarshalMap into GlobalRuleRow: %w", err)
 		return
+	}
+
+	if rule.SHA256 != "" && rule.Identifier == "" {
+		rule.Identifier = rule.SHA256
 	}
 
 	return

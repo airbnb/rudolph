@@ -35,6 +35,6 @@ type updateRulePolicyRequest struct {
 func machineRulePK(machineID string) string {
 	return fmt.Sprintf("%s%s", machineRulesPKPrefix, machineID)
 }
-func machineRuleSK(sha256 string, ruleType types.RuleType) string {
-	return rules.RuleSortKeyFromTypeSHA(sha256, ruleType)
+func machineRuleSK(identifier string, ruleType types.RuleType) string {
+	return rules.RuleSortKeyFromTypeIdentifier(identifier, ruleType)
 }

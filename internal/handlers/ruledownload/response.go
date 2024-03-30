@@ -15,10 +15,12 @@ type RuledownloadResponse struct {
 
 // RuledownloadRule is a single rule returned in a RuledownloadResponse
 // It duck-types to/from the SantaRule struct type
+// Documentation: https://santa.dev/development/sync-protocol.html#rules-objects
 type RuledownloadRule struct {
 	RuleType      types.RuleType `json:"rule_type"`
 	Policy        types.Policy   `json:"policy"`
-	SHA256        string         `json:"sha256"`
+	SHA256        string         `json:"sha256,omitempty"`
+	Identifier    string         `json:"identifier"`
 	CustomMessage string         `json:"custom_msg,omitempty"`
 }
 
@@ -29,6 +31,12 @@ func DDBRulesToResponseRules(rulesList []rules.SantaRule) (responseRules []Ruled
 
 	for i, rule := range rulesList {
 		responseRules[i] = RuledownloadRule(rule)
+		// responseRules[i] = RuledownloadRule{
+		// 	RuleType:      rule.RuleType,
+		//     Policy:        rule.Policy,
+		//     Identifier:    rule.Identifier,
+		//     CustomMessage: rule.CustomMessage,
+		// }
 	}
 	return
 }

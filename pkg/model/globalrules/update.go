@@ -11,10 +11,16 @@ import (
 	awsdynamodbtypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-func UpdateGlobalRule(time clock.TimeProvider, client dynamodb.TransactWriteItemsAPI, sha256 string, ruleType types.RuleType, rulePolicy types.Policy) (err error) {
+func UpdateGlobalRule(
+	time clock.TimeProvider,
+	client dynamodb.TransactWriteItemsAPI,
+	identifier string,
+	ruleType types.RuleType,
+	rulePolicy types.Policy,
+) error {
 	// Get the PK/SK values
 	pk := globalRulesPK
-	sk := globalRulesSK(sha256, ruleType)
+	sk := globalRulesSK(identifier, ruleType)
 
 	primaryKey := dynamodb.PrimaryKey{
 		PartitionKey: pk,
@@ -28,9 +34,9 @@ func UpdateGlobalRule(time clock.TimeProvider, client dynamodb.TransactWriteItem
 
 	// UpdatedRule for the ruleFeed Update
 	updatedRule := rules.SantaRule{
-		RuleType: ruleType,
-		Policy:   rulePolicy,
-		SHA256:   sha256,
+		RuleType:   ruleType,
+		Policy:     rulePolicy,
+		Identifier: identifier,
 	}
 
 	updateFeedRuleItem := feedrules.ConstructFeedRuleFromBaseRule(time, updatedRule)
@@ -56,8 +62,8 @@ func UpdateGlobalRule(time clock.TimeProvider, client dynamodb.TransactWriteItem
 	// Send the TransactWriteRequest
 	_, err = client.TransactWriteItems(transactItems, nil)
 	if err != nil {
-		err = fmt.Errorf("failed to update global rule: %w", err)
-		return
+		return fmt.Errorf("failed to update global rule: %w", err)
 	}
-	return
+
+	return nil
 }
