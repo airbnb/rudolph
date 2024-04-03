@@ -15,6 +15,9 @@ func ConstructFeedRuleFromBaseRule(timeProvider clock.TimeProvider, rule rules.S
 		identifier = rule.Identifier
 	}
 
+	// Morph the identifier back into the rule to start a slow migration
+	rule.Identifier = identifier
+
 	return FeedRuleRow{
 		PrimaryKey: dynamodb.PrimaryKey{
 			PartitionKey: feedRulesPK,
