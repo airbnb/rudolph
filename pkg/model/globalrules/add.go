@@ -19,16 +19,7 @@ func AddNewGlobalRule(
 	policy types.Policy,
 	description string,
 ) error {
-	// Input Validation
-	isValid, err := ruleValidation(ruleType, policy)
-	if err != nil {
-		return err
-	}
-	if !isValid {
-		return errors.New("no errors occurred during the rule validation check but the provided rule is not valid")
-	}
-
-	rule := GlobalRuleRow{
+	rule := &GlobalRuleRow{
 		PrimaryKey: dynamodb.PrimaryKey{
 			PartitionKey: globalRulesPK,
 			SortKey:      globalRulesSK(identifier, ruleType),
@@ -39,6 +30,15 @@ func AddNewGlobalRule(
 			Policy:     policy,
 			Identifier: identifier,
 		},
+	}
+
+	// Input Validation
+	isValid, err := rule.globalRuleValidation()
+	if err != nil {
+		return err
+	}
+	if !isValid {
+		return errors.New("no errors occurred during the rule validation check but the provided rule is not valid")
 	}
 
 	feedRule := feedrules.ConstructFeedRuleFromBaseRule(time, rule.SantaRule)
@@ -59,24 +59,4 @@ func AddNewGlobalRule(
 
 	_, err = client.TransactWriteItems(putItems, nil)
 	return err
-}
-
-func ruleValidation(
-	ruleType types.RuleType,
-	policy types.Policy,
-) (bool, error) {
-	// RuleType validation
-	_, err := ruleType.MarshalText()
-	if err != nil {
-		return false, err
-	}
-
-	// RulePolicy validation
-	_, err = policy.MarshalText()
-	if err != nil {
-		return false, err
-	}
-
-	// All validations have passed
-	return true, nil
 }

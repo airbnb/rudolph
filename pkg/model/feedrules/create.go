@@ -6,7 +6,10 @@ import (
 	"github.com/airbnb/rudolph/pkg/model/rules"
 )
 
-func ConstructFeedRuleFromBaseRule(timeProvider clock.TimeProvider, rule rules.SantaRule) FeedRuleRow {
+func ConstructFeedRuleFromBaseRule(
+	timeProvider clock.TimeProvider,
+	rule rules.SantaRule,
+) *FeedRuleRow {
 	var identifier string
 	// Support backwards compatibility with legacy SHA256 identifier
 	if rule.SHA256 != "" && rule.Identifier == "" {
@@ -15,7 +18,10 @@ func ConstructFeedRuleFromBaseRule(timeProvider clock.TimeProvider, rule rules.S
 		identifier = rule.Identifier
 	}
 
-	return FeedRuleRow{
+	// Morph the identifier back into the rule to start a slow migration
+	rule.Identifier = identifier
+
+	feedRuleRow := &FeedRuleRow{
 		PrimaryKey: dynamodb.PrimaryKey{
 			PartitionKey: feedRulesPK,
 			// With this sort key, all rules will be ordered by the date they are created,
@@ -27,6 +33,13 @@ func ConstructFeedRuleFromBaseRule(timeProvider clock.TimeProvider, rule rules.S
 		ExpiresAfter: GetSyncStateExpiresAfter(timeProvider),
 		DataType:     GetDataType(),
 	}
+
+	isValid, _ := feedRuleRow.feedRuleRowValidation()
+	if !isValid {
+		return nil
+	}
+
+	return feedRuleRow
 }
 
 func ReconstructFeedSyncLastEvaluatedKeyFromDate(feedSyncCursor string) dynamodb.PrimaryKey {
