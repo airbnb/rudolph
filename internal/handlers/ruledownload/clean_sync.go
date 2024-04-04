@@ -41,13 +41,16 @@ func (d concreteGlobalRuleDownloader) handle(machineID string, cursor ruledownlo
 		nextCursor.SetDynamodbLastEvaluatedKey(lastEvaluatedKey)
 	}
 
-	rules := make([]rules.SantaRule, len(*globalRules))
-	for i, rule := range *globalRules {
+	rules := make([]rules.SantaRule, len(globalRules))
+	for i, rule := range globalRules {
 		rules[i] = rule.SantaRule
 	}
 
 	return response.APIResponse(
 		http.StatusOK,
-		RuledownloadResponse{Rules: DDBRulesToResponseRules(rules), Cursor: &nextCursor},
+		RuledownloadResponse{
+			Rules:  DDBRulesToResponseRules(rules),
+			Cursor: &nextCursor,
+		},
 	)
 }
