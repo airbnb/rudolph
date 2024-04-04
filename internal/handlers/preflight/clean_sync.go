@@ -47,10 +47,7 @@ func (c concreteCleanSyncService) determineCleanSync(machineID string, preflight
 
 func determineCleanSyncByRuleCount(preflightRequest *PreflightRequest) bool {
 	ruleCount := preflightRequest.BinaryRuleCount + preflightRequest.CertificateRuleCount + preflightRequest.CompilerRuleCount + preflightRequest.TransitiveRuleCount
-	if ruleCount == 0 {
-		return true
-	}
-	return false
+	return ruleCount == 0
 }
 
 func determineCleanSyncRefresh(timeProvider clock.TimeProvider, machineID string, syncState *syncstate.SyncStateRow) (performCleanSync bool, err error) {
