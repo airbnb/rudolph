@@ -158,13 +158,13 @@ func getRules(client dynamodb.QueryAPI, callback func(globalrules.GlobalRuleRow)
 			err = fmt.Errorf("something went wrong querying global rules: %w", inerr)
 			return
 		}
-		if len(*rules) == 0 {
+		if len(rules) == 0 {
 			break
 		}
 
-		for _, rule := range *rules {
+		for _, rule := range rules {
 			total += 1
-			err = callback(rule)
+			err = callback(*rule)
 			if err != nil {
 				return
 			}

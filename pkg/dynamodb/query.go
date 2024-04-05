@@ -27,27 +27,6 @@ func query(tableName string, api dynamodbQueryAPI, input *dynamodb.QueryInput) (
 	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
-	// expressionAttributeValues := map[string]types.AttributeValue{
-	// 	":pk": &types.AttributeValueMemberS{
-	// 		Value: partitionKey,
-	// 	},
-	// }
-	// keyConditionExpression := aws.String("PK = :pk")
-
-	// var exclusiveStartKey map[string]types.AttributeValue
-	// input := &dynamodb.QueryInput{
-	// 	TableName:                 aws.String(tableName),
-	// 	ConsistentRead:            aws.Bool(consistentRead),
-	// 	ExpressionAttributeValues: expressionAttributeValues,
-	// 	KeyConditionExpression:    keyConditionExpression,
-	// 	ExclusiveStartKey:         exclusiveStartKey,
-	// 	FilterExpression: ,
-	// 	Limit:                     limit,
-	// }
-
-	// // var exclusiveStartKey map[string]types.AttributeValue{}
-	// exclusiveStartKey, _ = attributevalue.MarshalMap(cursor)
-
 	input.TableName = aws.String(tableName)
 
 	return api.Query(ctx, input)

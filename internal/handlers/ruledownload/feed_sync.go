@@ -65,13 +65,16 @@ func (d concreteFeedRuleDownloader) handle(machineID string, cursor ruledownload
 		nextCursor.SetDynamodbLastEvaluatedKey(lastEvaluatedKey)
 	}
 
-	rules := make([]rules.SantaRule, len(*feedRules))
-	for i, rule := range *feedRules {
+	rules := make([]rules.SantaRule, len(feedRules))
+	for i, rule := range feedRules {
 		rules[i] = rule.SantaRule
 	}
 
 	return response.APIResponse(
 		http.StatusOK,
-		RuledownloadResponse{Rules: DDBRulesToResponseRules(rules), Cursor: &nextCursor},
+		RuledownloadResponse{
+			Rules:  DDBRulesToResponseRules(rules),
+			Cursor: &nextCursor,
+		},
 	)
 }

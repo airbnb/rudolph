@@ -7,6 +7,7 @@ import (
 	"github.com/airbnb/rudolph/pkg/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	awsdynamodb "github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
@@ -21,7 +22,7 @@ func GetPaginatedGlobalRules(
 	limit int,
 	exclusiveStartKey *dynamodb.PrimaryKey,
 ) (
-	items *[]GlobalRuleRow,
+	items []*GlobalRuleRow,
 	lastEvaluatedKey *dynamodb.PrimaryKey,
 	err error,
 ) {
@@ -32,10 +33,10 @@ func GetPaginatedGlobalRules(
 		return
 	}
 
-	keyConditionExpression := aws.String("PK = :pk")
-	expressionAttributeValues := map[string]types.AttributeValue{
-		":pk": &types.AttributeValueMemberS{Value: partitionKey},
-	}
+	keyCond := expression.KeyEqual(
+		expression.Key("PK"), expression.Value(partitionKey),
+	)
+
 	var exclusiveStartKeyInput map[string]types.AttributeValue
 	if exclusiveStartKey != nil {
 		exclusiveStartKeyInput, err = attributevalue.MarshalMap(exclusiveStartKey)
@@ -45,10 +46,16 @@ func GetPaginatedGlobalRules(
 		}
 	}
 
+	expr, err := expression.NewBuilder().WithKeyCondition(keyCond).Build()
+	if err != nil {
+		return
+	}
+
 	input := &awsdynamodb.QueryInput{
 		ConsistentRead:            aws.Bool(false),
-		ExpressionAttributeValues: expressionAttributeValues,
-		KeyConditionExpression:    keyConditionExpression,
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		KeyConditionExpression:    expr.KeyCondition(),
 		ExclusiveStartKey:         exclusiveStartKeyInput,
 		Limit:                     aws.Int32(int32(limit)),
 	}
@@ -64,19 +71,19 @@ func GetPaginatedGlobalRules(
 	if result.LastEvaluatedKey != nil {
 		err = attributevalue.UnmarshalMap(result.LastEvaluatedKey, &lastEvaluatedKey)
 		if err != nil {
-			err = fmt.Errorf("failed to unmarshall LastEvaluatedKey: %w", err)
+			err = fmt.Errorf("failed to UnmarshalMap LastEvaluatedKey: %w", err)
 			return
 		}
 	}
 
 	err = attributevalue.UnmarshalListOfMaps(result.Items, &items)
 	if err != nil {
-		err = fmt.Errorf("failed to unmarshal result from DynamoDB: %w", err)
+		err = fmt.Errorf("failed to UnmarshalListOfMaps result from DynamoDB: %w", err)
 		return
 	}
 
 	// To support legacy SHA256 types, we must transform the datasets before returning
-	for _, item := range *items {
+	for _, item := range items {
 		if item.SHA256 != "" && item.Identifier == "" {
 			item.Identifier = item.SHA256
 		}

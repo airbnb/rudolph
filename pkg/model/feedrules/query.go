@@ -20,7 +20,7 @@ func GetPaginatedFeedRules(
 	limit int,
 	exclusiveStartKey *dynamodb.PrimaryKey,
 ) (
-	items *[]FeedRuleRow,
+	items []*FeedRuleRow,
 	lastEvaluatedKey *dynamodb.PrimaryKey,
 	err error,
 ) {
@@ -77,7 +77,7 @@ func GetPaginatedFeedRules(
 	// log.Printf("    got %d items from query.", len(*items))
 
 	// To support legacy SHA256 types, we must transform the datasets before returning
-	for _, item := range *items {
+	for _, item := range items {
 		if item.SHA256 != "" && item.Identifier == "" {
 			item.Identifier = item.SHA256
 		}

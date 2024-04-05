@@ -57,13 +57,13 @@ func rules(client dynamodb.QueryAPI, tf flags.TargetFlags, limit int) error {
 			return fmt.Errorf("failed to get rules: %w", err)
 		}
 
-		ruleCount := len(*rules)
+		ruleCount := len(rules)
 		if lastEvaluatedKey != nil {
 			fmt.Printf("Retrieved more than %d rules:\n", ruleCount)
 		} else {
 			fmt.Printf("Retrieved %d rules:\n", ruleCount)
 		}
-		for i, rule := range *rules {
+		for i, rule := range rules {
 			fmt.Println("----- [", i, "] (", rule.SortKey, ")")
 			fmt.Printf("%s: %s\n", renderRule(rule.SantaRule), rule.Description)
 			fmt.Println("")
