@@ -10,7 +10,7 @@ type RuledownloadResponse struct {
 	Rules []RuledownloadRule `json:"rules"`
 	// When a cursor is returned by the server, it is an indicator to the Santa sensor that there are
 	// additional rules to be paginated through. This cursor is passed to the next request.
-	Cursor *ruledownloadCursor `json:"cursor,omitempty"`
+	Cursor string `json:"cursor,omitempty"`
 }
 
 // RuledownloadRule is a single rule returned in a RuledownloadResponse

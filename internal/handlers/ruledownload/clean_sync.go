@@ -1,6 +1,7 @@
 package ruledownload
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -46,11 +47,18 @@ func (d concreteGlobalRuleDownloader) handle(machineID string, cursor ruledownlo
 		rules[i] = rule.SantaRule
 	}
 
+	// Marshal the cursor to a string
+	jsonCursor, err := json.Marshal(nextCursor)
+	if err != nil {
+		log.Printf("  json.Marshal Error %s", err.Error())
+		return response.APIResponse(http.StatusInternalServerError, err)
+	}
+
 	return response.APIResponse(
 		http.StatusOK,
 		RuledownloadResponse{
 			Rules:  DDBRulesToResponseRules(rules),
-			Cursor: &nextCursor,
+			Cursor: string(jsonCursor),
 		},
 	)
 }
