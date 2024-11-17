@@ -13,12 +13,13 @@ import (
 )
 
 // RuleDownloadHandler handles requests to the /ruledownload and /ruledownload/{machine_id} API endpoints
-//   During every sync, Santa sensors make successive POST requests to the /ruledownload endpoint to paginate
-//   through all rules.
-//   When given a blank postbody (e.g. {}), it indicates the very first request in a sequence. If the
-//   API returns a "cursor" in the response body, this cursor will be sent back verbatim in a subsequent postbody.
-//   When a response does not return a "cursor" in the body, it signals that there are no more items to page
-//   through, and the sensor will stop sending requests.
+//
+//	During every sync, Santa sensors make successive POST requests to the /ruledownload endpoint to paginate
+//	through all rules.
+//	When given a blank postbody (e.g. {}), it indicates the very first request in a sequence. If the
+//	API returns a "cursor" in the response body, this cursor will be sent back verbatim in a subsequent postbody.
+//	When a response does not return a "cursor" in the body, it signals that there are no more items to page
+//	through, and the sensor will stop sending requests.
 type PostRuledownloadHandler struct {
 	booted        bool
 	cursorService ruledownloadCursorService
@@ -27,7 +28,6 @@ type PostRuledownloadHandler struct {
 	mhandler      machineRuleDownloder
 }
 
-//
 func (h *PostRuledownloadHandler) Boot() (err error) {
 	if h.booted {
 		return
@@ -59,12 +59,10 @@ func (h *PostRuledownloadHandler) Boot() (err error) {
 	return
 }
 
-//
 func (h *PostRuledownloadHandler) Handles(request events.APIGatewayProxyRequest) bool {
 	return request.Resource == "/ruledownload/{machine_id}" && request.HTTPMethod == "POST"
 }
 
-//
 func (h *PostRuledownloadHandler) Handle(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	machineID, ok := request.PathParameters["machine_id"]
 	if !ok {
@@ -79,6 +77,15 @@ func (h *PostRuledownloadHandler) Handle(request events.APIGatewayProxyRequest) 
 	if err != nil {
 		log.Printf("  Failed to unmarshall ruledownload request Error %s", err.Error())
 		return response.APIResponse(http.StatusBadRequest, response.ErrInvalidBodyResponse)
+	}
+
+	if ruledownloadRequest.RawCursor != "" {
+		ruledownloadRequest.Cursor = &ruledownloadCursor{}
+		err = json.Unmarshal([]byte(ruledownloadRequest.RawCursor), ruledownloadRequest.Cursor)
+		if err != nil {
+			log.Printf("  Failed to unmarshall cursor Error %s", err.Error())
+			return response.APIResponse(http.StatusBadRequest, response.ErrInvalidBodyResponse)
+		}
 	}
 
 	return h.handleRuleDownload(machineID, ruledownloadRequest)
