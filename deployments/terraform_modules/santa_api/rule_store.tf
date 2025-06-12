@@ -4,6 +4,7 @@ module "rule_store" {
   prefix          = var.prefix
   aws_account_id  = var.aws_account_id
   region          = var.region
+  kms_key_administrators_arns = var.kms_key_administrators_arns
 
   # Add function role names to this that need access to the
   # rule table(s)
