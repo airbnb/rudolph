@@ -13,12 +13,12 @@ make init-env
 You will need a directory under `deployments/environments/{{ENV}}/`. For example, this current environment's `ENV` is "example", as it is located at `deployments/environment/example`.
 
 ### `_variables.tf`
-This file is a symlink to [deployments/terraform_modules/default_variables.tf](deployments/terraform_modules/default_variables.tf).
+This file is a symlink to [deployments/terraform_modules/default_variables.tf](../../../deployments/terraform_modules/default_variables.tf).
 
 You will never need to edit this variables file after creating the symlink. Leave it as-is.
 
 ### `main.tf`
-This file is a symlink to [deployments/terraform_modules/default_main.tf](deployments/terraform_modules/default_main.tf).
+This file is a symlink to [deployments/terraform_modules/default_main.tf](../../../deployments/terraform_modules/default_main.tf).
 
 You will never need to edit this main file after creating the symlink. Leave it as-is.
 
