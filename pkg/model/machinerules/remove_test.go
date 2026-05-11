@@ -9,6 +9,7 @@ import (
 	awsdynamodb "github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	awsdynamodbtypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 type mockGetter func(key dynamodb.PrimaryKey, consistentRead bool) (*awsdynamodb.GetItemOutput, error)
@@ -100,4 +101,44 @@ func Test_RemoveMachineRule_OK(t *testing.T) {
 		assert.True(t, updatecalled)
 		assert.Empty(t, err)
 	}
+}
+
+func Test_RemoveMachineRule_NotFound(t *testing.T) {
+	err := RemoveMachineRule(
+		mockGetter(
+			func(key dynamodb.PrimaryKey, consistentRead bool) (*awsdynamodb.GetItemOutput, error) {
+				return &awsdynamodb.GetItemOutput{}, nil
+			},
+		),
+		mockUpdater(
+			func(key dynamodb.PrimaryKey, item interface{}) (*awsdynamodb.UpdateItemOutput, error) {
+				assert.Fail(t, "UpdateItem should not be called when rule does not exist")
+				return &awsdynamodb.UpdateItemOutput{}, nil
+			},
+		),
+		"AAAA-BBBB-CCCC",
+		"AAA#SORTKEY",
+	)
+
+	assert.ErrorIs(t, err, ErrRuleNotFound)
+}
+
+func Test_ConcreteMachineRulesService_Remove_Idempotent(t *testing.T) {
+	mocked := &MockDynamodb{}
+	mocked.On("GetItem", mock.Anything, mock.Anything).Return(&awsdynamodb.GetItemOutput{}, nil)
+
+	service := ConcreteMachineRulesService{dynamodb: mocked}
+
+	err := service.Remove("AAAA-BBBB-CCCC", "somehash", types.Binary)
+	assert.NoError(t, err, "Remove should be a no-op when the rule does not exist")
+}
+
+func Test_ConcreteMachineRulesService_RemoveBySortKey_Idempotent(t *testing.T) {
+	mocked := &MockDynamodb{}
+	mocked.On("GetItem", mock.Anything, mock.Anything).Return(&awsdynamodb.GetItemOutput{}, nil)
+
+	service := ConcreteMachineRulesService{dynamodb: mocked}
+
+	err := service.RemoveBySortKey("AAAA-BBBB-CCCC", "Binary#somehash")
+	assert.NoError(t, err, "RemoveBySortKey should be a no-op when the rule does not exist")
 }

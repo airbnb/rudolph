@@ -1,6 +1,7 @@
 package machinerules
 
 import (
+	"errors"
 	"time"
 
 	"github.com/airbnb/rudolph/pkg/clock"
@@ -56,10 +57,18 @@ func (s ConcreteMachineRulesService) Update(machineId string, identifier string,
 	return UpdateMachineRule(s.dynamodb, machineId, identifier, ruleType, rulePolicy, expires)
 }
 func (s ConcreteMachineRulesService) RemoveBySortKey(machineId string, ruleSortKey string) error {
-	return RemoveMachineRule(s.dynamodb, s.dynamodb, machineId, ruleSortKey)
+	err := RemoveMachineRule(s.dynamodb, s.dynamodb, machineId, ruleSortKey)
+	if errors.Is(err, ErrRuleNotFound) {
+		return nil
+	}
+	return err
 }
 func (s ConcreteMachineRulesService) Remove(machineId string, identifier string, ruleType types.RuleType) error {
-	return RemoveMachineRule(s.dynamodb, s.dynamodb, machineId, machineRuleSK(identifier, ruleType))
+	err := RemoveMachineRule(s.dynamodb, s.dynamodb, machineId, machineRuleSK(identifier, ruleType))
+	if errors.Is(err, ErrRuleNotFound) {
+		return nil
+	}
+	return err
 }
 func (s ConcreteMachineRulesService) GetMachineRules(machineId string) (items *[]MachineRuleRow, err error) {
 	return GetMachineRules(s.dynamodb, machineId)

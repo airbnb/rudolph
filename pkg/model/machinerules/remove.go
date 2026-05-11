@@ -10,6 +10,9 @@ import (
 	"github.com/airbnb/rudolph/pkg/types"
 )
 
+// ErrRuleNotFound is returned by RemoveMachineRule when the target rule does not exist in DynamoDB.
+var ErrRuleNotFound = errors.New("no such rule exists")
+
 // @deprecated
 // RemoveMachineRule executes the flow to "remove" a rule for the given machine. Upon next sync,
 // the santa sensor will receive instructions to remove the rule from the database. If there is a
@@ -25,7 +28,7 @@ func RemoveMachineRule(getter dynamodb.GetItemAPI, updater dynamodb.UpdateItemAP
 		return fmt.Errorf("failed to retrieve existing rule")
 	}
 	if rule == nil {
-		return errors.New("no such rule exists")
+		return ErrRuleNotFound
 	}
 
 	// First pull the associated global rule if any
