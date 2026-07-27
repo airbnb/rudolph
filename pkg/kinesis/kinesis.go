@@ -8,6 +8,13 @@ import (
 )
 
 func (c client) Send(machineID string, events KinesisEvents) (err error) {
+	// Kinesis PutRecords requires at least one record; calling it with an empty
+	// Records slice returns "InvalidParameter: minimum field size of 1". Nothing
+	// to send, so return success rather than issuing an invalid API call.
+	if len(events.Items) == 0 {
+		return nil
+	}
+
 	putRecordsRecords := []*awskinesis.PutRecordsRequestEntry{}
 	for _, event := range events.Items {
 		item, err := json.Marshal(event)
